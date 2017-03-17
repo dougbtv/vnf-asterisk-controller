@@ -24,9 +24,14 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
   
 script:
+  # For debug...
+  - ip a
+  # Builds the 
   - docker-compose build
+  # You can add environment variables with: -e DEBUG=1
   - docker-compose up -d
-
+  # Runs the unit tests
+  - docker exec -it controller grunt nodeunit
   
 
   # ----------------------------------------------------- OLD REFERENCE.

@@ -5,9 +5,54 @@ services:
     container_name: controller
     build: ./docker/.
     image: dougbtv/vnf-asterisk-controller
+    depends_on:
+      - etcd
+    links:
+      - etcd
     ports:
       - "8001:8001"
     volumes:
       - "./:/vac"
     command: "/bin/bash -c 'while true; do sleep 1; done'"
+  # --------------------------------------------- etcd
+  # Cheat sheet !
+  # ----------------------
+  # $ curl -L -X PUT http://localhost:2379/v2/keys/message -d value="sup sup"
+  # {"action":"set","node":{"key":"/message","value":"sup sup","modifiedIndex":6,"createdIndex":6}}
+  # $ curl -L http://localhost:2379/v2/keys/message
+  # {"action":"get","node":{"key":"/message","value":"sup sup","modifiedIndex":6,"createdIndex":6}}
+  etcd:
+    container_name: "etcd"
+    image: "quay.io/coreos/etcd"
+    ports: 
+      - "4001:4001"
+      - "2380:2380"
+      - "2379:2379"
+    command: >
+      etcd
+      -name etcd0
+      -advertise-client-urls http://172.17.0.1:2379,http://172.17.0.1:4001
+      -listen-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001
+      -initial-advertise-peer-urls http://172.17.0.1:2380
+      -listen-peer-urls http://0.0.0.0:2380
+      -initial-cluster-token etcd-cluster-1
+      -initial-cluster etcd0=http://172.17.0.1:2380
+      -initial-cluster-state new
   # --------------------------------------------- Asterisk
+  asterisk:
+    container_name: asterisk
+    image: "dougbtv/asterisk14"
+    volumes:
+      - ./docker/asterisk_entrypoint.sh:/entrypoint.sh
+    entrypoint: "/entrypoint.sh"
+    depends_on:
+      - etcd
+    links:
+      - etcd
+    ports:
+      - "8088:8088"
+      - "5060:5060/udp"
+      - "10000:10001/udp"
+    environment: 
+      TARGET_INTERFACE: "eth0"
+      ETCD_HOSTNAME: "etcd"
