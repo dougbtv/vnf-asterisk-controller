@@ -1,0 +1,90 @@
+sudo: required
+services:
+  - docker
+env:
+  DOCKER_COMPOSE_VERSION: 1.9.0
+
+before_install:
+  # Install a later docker
+  - sudo apt-get update -y
+  - sudo timedatectl set-timezone UTC
+  - sudo apt-get install -y apt-transport-https ca-certificates apparmor libfaketime
+  - sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+  - sudo su -c "echo 'deb https://apt.dockerproject.org/repo ubuntu-trusty main' > /etc/apt/sources.list.d/docker.list"
+  - sudo apt-get update -y 
+  - sudo apt-cache policy docker-engine
+  - >
+    sudo apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y docker-engine
+  - sudo service docker stop || true
+  - sudo service docker start
+  # Setup docker-compose
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  
+script:
+  - docker-compose build
+  - docker-compose up -d
+
+  
+
+  # ----------------------------------------------------- OLD REFERENCE.
+  # # Wait for containers to be bootstrapped.
+  # - >
+  #   export tries=0; 
+  #   export max_tries=60;
+  #   while [[ true ]]; do 
+  #     tries=$((tries + 1));
+  #     echo "waiting for containers to be bootstrapped with data structures... [$tries]"; 
+  #     sleep 2; 
+  #     docker exec -it homer-webapp ls /homer-semaphore/.bootstrapped &> /dev/null; 
+  #     look_exit=$?; 
+  #     if [[ "$look_exit" = "0" ]]; then echo "found semaphore"; break; fi; 
+  #     if [[ "$tries" -ge "$max_tries" ]]; then echo "no semaphore found in time"; exit 1; break; fi;
+  #   done;
+
+  # # Now you can run HEPGEN.js
+  # - docker exec -it hepgen node hepgen.js
+  # # Show all the tables
+  # - docker exec -it mysql mysql -u root -p'secret' -s -e "show tables from homer_data"
+  # # Select all the data
+  # - docker exec -it mysql mysql -u root -p'secret' -s -e "SELECT * FROM homer_data.sip_capture_call_$(date '+%Y%m%d')\G"
+  # # Check that there's something in the database, we select the count of calls from HEPGEN.js, and verify there's 3 calls counted
+  # # - docker exec -it mysql mysql -u root -p'secret' -s -e "SELECT COUNT(*) FROM homer_data.sip_capture_call_$(date '+%Y%m%d')" | tail -n 1 | grep -Pi "^3"
+  # # Work-around
+  # # let's check that it asks for proxy auth. I don't know why and I'd like to understand this, but, the bottom line is data is making it to the database
+  # - docker exec -it mysql mysql -u root -p'secret' -s -e "SELECT * FROM homer_data.sip_capture_call_$(date '+%Y%m%d')\G" | grep -i "proxy auth"
+  # # Check that there's a web connection on local host, returning a 200 OK
+  # - > 
+  #   curl -s -o /dev/null -w "%{http_code}" localhost | grep -iP "^200$"
+
+  # # Let's try to test cron, let's set the system time.
+  # - sudo date --set="$(date -d '+4 days' +'%d %b %Y 03:29:50')"
+  # # Show host date...
+  # - date
+  # # Show cron's date inside the container...
+  # - docker exec -it homer-cron date
+
+  # # Create a grep pattern.
+  # - target_pattern=sip_capture_call_$(date +'%Y%m%d')
+
+  # # Wait up to two minutes looking for the tables.
+  # - >
+  #   export tries=0; 
+  #   export max_tries=60;
+  #   while [[ true ]]; do 
+  #     tries=$((tries + 1));
+  #     echo "waiting for cron to run... [$tries]"; 
+  #     sleep 2; 
+  #     # Now see that today's table is there, which would indicate that the cron job ran.
+  #     docker exec -it mysql mysql -u root -p'secret' -s -e "show tables from homer_data" | grep sip_capture_call_$(date +'%Y%m%d')
+  #     look_exit=$?; 
+  #     if [[ "$look_exit" = "0" ]]; then echo "found table created by cron"; break; fi; 
+  #     if [[ "$tries" -ge "$max_tries" ]]; then echo "no table created by cron in time"; exit 1; break; fi;
+  #   done;
+
+  # # Show all the tables (for debugging purposes)
+  # - docker exec -it mysql mysql -u root -p'secret' -s -e "show tables from homer_data"
+  # # And look at the cron logs and the docker logs
+  # - docker logs homer-cron

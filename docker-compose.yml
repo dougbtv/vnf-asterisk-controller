@@ -1,0 +1,13 @@
+version: '2'
+services:
+  # --------------------------------------------- Controller
+  controller:
+    container_name: controller
+    build: ./docker/.
+    image: dougbtv/vnf-asterisk-controller
+    ports:
+      - "8001:8001"
+    volumes:
+      - "./:/vac"
+    command: "/bin/bash -c 'while true; do sleep 1; done'"
+  # --------------------------------------------- Asterisk

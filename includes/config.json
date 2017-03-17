@@ -1,0 +1,7 @@
+{
+  "SERVER_PORT": "8001",
+  "CONFIG_NAME": "example",
+  "temp_path": "/tmp",
+  "log_stdout": false,
+  "pretty_log": true
+}
