@@ -31,7 +31,7 @@ script:
   # You can add environment variables with: -e DEBUG=1
   - docker-compose up -d
   # Runs the unit tests
-  - docker exec -it controller grunt nodeunit
+  - docker exec -it controller /bin/bash -c 'cd /vac/; /usr/local/bin/grunt nodeunit'
   
 
   # ----------------------------------------------------- OLD REFERENCE.
