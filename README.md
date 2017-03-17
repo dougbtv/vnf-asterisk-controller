@@ -1,5 +1,7 @@
 # vnf-asterisk-controller
 
+[![Build Status](https://travis-ci.org/dougbtv/vnf-asterisk-controller.svg?branch=master)](https://travis-ci.org/dougbtv/vnf-asterisk-controller)
+
 A controller for vnf-asterisk. This readme is generally a big fat stub for now.
 
 ## Building & Running it (for development)
