@@ -32,7 +32,7 @@ script:
   - docker-compose up -d
   # Runs the unit tests
   - mkdir node_modules
-  - docker exec -it controller npm install &> /dev/null
+  - docker exec -it controller npm install --silent
   - docker exec -it controller grunt nodeunit
   
 
