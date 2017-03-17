@@ -32,7 +32,7 @@ script:
   - docker-compose up -d
   # Runs the unit tests
   - docker exec -it controller which grunt
-  - docker exec -it controller /bin/bash -c 'cd /vac/; /usr/local/bin/grunt nodeunit'
+  - docker exec -it controller /bin/bash -c 'cd /vac/; pwd; ls -l; /usr/local/bin/grunt nodeunit'
   
 
   # ----------------------------------------------------- OLD REFERENCE.
