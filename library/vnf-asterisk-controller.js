@@ -4,4 +4,10 @@ module.exports = function(opts,log) {
   this.restserver = new RestServer(this,opts,log);
   this.restserver.serverStart();
 
+  var PushConfig = require("./PushConfig.js"); 
+  this.pushconfig = new PushConfig(this,opts,log);
+
+  var discoverAsterisk = require("./discoverAsterisk.js"); 
+  this.discoverasterisk = new discoverAsterisk(this,opts,log);
+  
 }

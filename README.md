@@ -20,6 +20,18 @@ And you can run it with:
 docker-compose up
 ```
 
+## nodemon in dev
+
+```
+nodemon vnf-asterisk-controller.js
+```
+
 ## Unit tests
 
 This project includes unit tests. [stub!]
+
+With a running server...
+
+```
+
+```
