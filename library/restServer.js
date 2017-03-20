@@ -73,6 +73,7 @@ module.exports = function(vac, opts, log) {
     var endpoints = [
       { route: '/foo',             method: this.testFunction },
       { route: '/pushconfig',         method: this.pushConfig },
+      { route: '/getconfig',         method: this.getConfig },
       { route: '/version',           method: this.version },
       { route: '/list/:query',         method: this.list },
     ];
@@ -89,7 +90,7 @@ module.exports = function(vac, opts, log) {
 
   this.pushConfig = function(req, res, next) {
 
-    vac.pushconfig.createEndPoint('alice','supersecret',function(err){
+    vac.pushconfig.createEndPoint('boxid_unused_fornow','alice','supersecret',function(err){
 
       if (!err) {
         // Return a JSON result.
@@ -102,6 +103,24 @@ module.exports = function(vac, opts, log) {
     });
 
   }
+
+  this.getConfig = function(req, res, next) {
+
+    vac.pushconfig.listEndPoint('boxid_unused_fornow','alice',function(err,info){
+
+      if (!err) {
+        // Return a JSON result.
+        res.contentType = 'json';
+        res.send(info);
+        
+      } else {
+        res.send(500, err);
+      }
+
+    });
+
+  }
+
 
   this.list = function(req, res, next) {
 

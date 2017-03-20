@@ -8,7 +8,7 @@ module.exports = function(vac, opts, log) {
 
   // More info @ https://wiki.asterisk.org/wiki/display/AST/ARI+Push+Configuration
 
-  var createEndPoint = function(username,password,callback) {
+  var createEndPoint = function(boxid,username,password,callback) {
 
     vac.discoverasterisk.getBoxIP('boxid_unused',function(err,asteriskip){
 
@@ -46,9 +46,9 @@ module.exports = function(vac, opts, log) {
             // client.put(url, fields, function(err, req, res, data) {
             request.put({url: url, auth: auth, formData: formData}, function (err, res, data) {
               
-              log.it("WHERE THE HECK....",res);
-              console.log('%d -> %j', res.statusCode, res.headers);
-              console.log('%s', data);
+              // console.log('%d -> %j', res.statusCode, res.headers);
+              // console.log('%s', data);
+
               if (!err && res.statusCode == 200) {
                 // Ok, do things.
                 callback(false);
@@ -78,9 +78,9 @@ module.exports = function(vac, opts, log) {
             // client.put(url, fields, function(err, req, res, data) {
             request.put({url: url, auth: auth, formData: formData}, function (err, res, data) {
               
-              log.it("WHERE THE HECK....a",res);
-              console.log('%d -> %j', res.statusCode, res.headers);
-              console.log('%s', data);
+              // console.log('%d -> %j', res.statusCode, res.headers);
+              // console.log('%s', data);
+
               if (!err && res.statusCode == 200) {
                 // Ok, do things.
                 callback(false);
@@ -92,12 +92,11 @@ module.exports = function(vac, opts, log) {
                 callback(err);
               }
             });
-
            
           },
         ],function(err,results){
 
-          log.it("pushconfig_createnedpoint_complete",{username: username});
+          log.it("pushconfig_createnedpoint_complete",{username: username, asteriskip: asteriskip,boxid: boxid});
           callback(err);
 
         });
@@ -115,6 +114,51 @@ module.exports = function(vac, opts, log) {
   }
 
   this.createEndPoint = createEndPoint;
+
+
+  // not great...
+  // http://localhost:8088/ari/asterisk/config/dynamic/res_pjsip/auth/%s
+
+  // # This worked.
+  // curl http://asterisk:asterisk@172.19.0.3:8088/ari/asterisk/config/dynamic/res_pjsip/endpoint/alice
+
+  var listEndPoint = function(boxid,endpoint,callback) {
+
+    vac.discoverasterisk.getBoxIP('boxid_unused',function(err,asteriskip){
+
+      var server_url = "http://asterisk:asterisk@" + asteriskip + ":" + opts.sourcery_port;
+
+      var url = server_url + "/ari/asterisk/config/dynamic/res_pjsip/endpoint/" + endpoint;
+
+      log.it("requested_URLLLLL",{ url: url});
+
+      request.get({url: url}, function (err, res, data) {
+        
+        // console.log('%d -> %j', res.statusCode, res.headers);
+        // console.log('%s', data);
+        log.it("pushconfig_debug_listendpoint", {res: res});
+
+        if (!err) { //  && res.statusCode == 200
+          // Alright, so we should determine if it's found or not.
+          var exists = false;
+          if (res.statusCode == 200) { exists = true; }
+          
+          callback(false,{exists: exists, data: data});
+          
+        } else {
+          if (!err) {
+            err = "pushconfig_endpoint_statuscode_error_" + res.statusCode;
+          }
+          log.error("pushconfig_error_endpointurl",{error: err, data: data, statuscode: res.statusCode});
+          callback(err);
+        }
+      });
+
+    });
+
+  }
+
+  this.listEndPoint = listEndPoint;
 
 }
 

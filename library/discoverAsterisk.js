@@ -1,3 +1,4 @@
+
 module.exports = function(vac, opts, log) {
 
   // etcd deps.
@@ -10,6 +11,7 @@ module.exports = function(vac, opts, log) {
   var store = etcdjs(opts.etcd_host + ':4001');
   log.it("pushconfig_etcd","push config, etcd host @ " + opts.etcd_host + ':4001');
 
+  // Given an identifier, gets an IP for a specific asterisk instance.
   this.getBoxIP = function(boxidentifier,callback) {
 
     store.get('asterisk/ip', function(err, etcdresult) {
