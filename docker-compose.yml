@@ -44,6 +44,8 @@ services:
     image: "dougbtv/asterisk14"
     volumes:
       - ./docker/asterisk_entrypoint.sh:/entrypoint.sh
+      - ./docker/http.conf:/etc/asterisk/http.conf
+      - ./docker/ari.conf:/etc/asterisk/ari.conf
     entrypoint: "/entrypoint.sh"
     depends_on:
       - etcd
