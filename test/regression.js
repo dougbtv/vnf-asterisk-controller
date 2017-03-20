@@ -44,6 +44,10 @@ if (startserver) {
 }
 // ----------------------- end cli environment options.
 
+// Used among tests.
+
+var uuid_firstinstance;
+
 var uploadFile = function(query,upload_path,backup_filepath,test,callback) {
 
   // Here's our file attachment.
@@ -154,9 +158,24 @@ module.exports = {
       test.done();
     });
   },
+  discoverOK: function(test){
+  
+    client.get('/discover', function(err, req, res, data) {
+
+      if (err) {
+        test.ok(false, "Restify error: " + err);
+      }
+    
+      test.ok(res.statusCode == 200, "discover returns 200 OK");
+      test.ok(typeof data[0].uuid == 'string', "discover first element uuid is a string");
+      var uuid_firstinstance = data[0].uuid;
+      test.done();
+
+    });
+  },
   pushConfigOK: function(test){
   
-    client.get('/pushconfig', function(err, req, res, data) {
+    client.get('/pushconfig/', function(err, req, res, data) {
 
       if (err) {
         test.ok(false, "Restify error: " + err);

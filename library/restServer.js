@@ -75,6 +75,7 @@ module.exports = function(vac, opts, log) {
       { route: '/pushconfig',         method: this.pushConfig },
       { route: '/getconfig',         method: this.getConfig },
       { route: '/deleteconfig',         method: this.deleteConfig },
+      { route: '/discover',         method: this.discoverAll },
       { route: '/version',           method: this.version },
       { route: '/list/:query',         method: this.list },
     ];
@@ -88,6 +89,23 @@ module.exports = function(vac, opts, log) {
     }.bind(this));
 
   };
+
+  this.discoverAll = function(req, res, next) {
+
+    vac.discoverasterisk.discoverAll(function(err,boxes){
+
+      if (!err) {
+        // Return a JSON result.
+        res.contentType = 'json';
+        res.send(boxes);
+      } else {
+        res.send(500, err);
+      }
+
+    });
+
+  }
+
 
   this.pushConfig = function(req, res, next) {
 
