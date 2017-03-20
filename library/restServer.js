@@ -74,6 +74,7 @@ module.exports = function(vac, opts, log) {
       { route: '/foo',             method: this.testFunction },
       { route: '/pushconfig',         method: this.pushConfig },
       { route: '/getconfig',         method: this.getConfig },
+      { route: '/deleteconfig',         method: this.deleteConfig },
       { route: '/version',           method: this.version },
       { route: '/list/:query',         method: this.list },
     ];
@@ -95,7 +96,7 @@ module.exports = function(vac, opts, log) {
       if (!err) {
         // Return a JSON result.
         res.contentType = 'json';
-        res.send(["test","12"]);
+        res.send({created_username: 'alice', box_created: 'boxid_unused_fornow'});
       } else {
         res.send(500, err);
       }
@@ -112,7 +113,7 @@ module.exports = function(vac, opts, log) {
         // Return a JSON result.
         res.contentType = 'json';
         res.send(info);
-        
+
       } else {
         res.send(500, err);
       }
@@ -121,6 +122,23 @@ module.exports = function(vac, opts, log) {
 
   }
 
+  
+  this.deleteConfig = function(req, res, next) {
+
+    vac.pushconfig.deleteEndPoint('boxid_unused_fornow','alice',function(err){
+
+      if (!err) {
+        // Return a JSON result.
+        res.contentType = 'json';
+        res.send({deleted_user: 'alice', deleted_boxid: 'boxid_unused_fornow'});
+
+      } else {
+        res.send(500, err);
+      }
+
+    });
+
+  }
 
   this.list = function(req, res, next) {
 
