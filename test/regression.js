@@ -154,6 +154,43 @@ module.exports = {
       test.done();
     });
   },
+  pushConfigOK: function(test){
+  
+    client.get('/pushconfig', function(err, req, res, data) {
+
+      if (err) {
+        test.ok(false, "Restify error: " + err);
+      }
+    
+      test.ok(res.statusCode == 200, "pushconfig returns 200 OK");
+      test.done();
+
+    });
+  },
+  listConfigOK: function(test){
+  
+    client.get('/getconfig', function(err, req, res, data) {
+
+      if (err) {
+        test.ok(false, "Restify error: " + err);
+      }
+    
+      test.ok(res.statusCode == 200, "getconfig returns 200 OK");
+      test.done();
+    });
+  },
+  deleteConfigOK: function(test){
+  
+    client.get('/deleteconfig', function(err, req, res, data) {
+
+      if (err) {
+        test.ok(false, "Restify error: " + err);
+      }
+    
+      test.ok(res.statusCode == 200, "deleteconfig returns 200 OK");
+      test.done();
+    });
+  },
   serverKill: function(test) {
     if (startserver) {
       vac.kill(); 

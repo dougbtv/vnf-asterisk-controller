@@ -33,8 +33,11 @@ This project includes unit tests. [stub!]
 With a running server...
 
 ```
-
+export NOSERVER=1
+grunt test
 ```
+
+Without a running server, just use `grunt test`
 
 ## Application structure, namespaces, and naming conventions.
 
