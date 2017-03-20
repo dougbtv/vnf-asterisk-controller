@@ -13,6 +13,7 @@ module.exports = function(vac, opts, log) {
 
   var createEndPoint = function(boxid,username,password,callback) {
 
+    log.it("trace_listendpoint_create",{boxid: boxid});
     vac.discoverasterisk.getBoxIP(boxid,function(err,asteriskip){
 
       if (!err) {
@@ -146,7 +147,8 @@ module.exports = function(vac, opts, log) {
 
   var listEndPoint = function(boxid,endpoint,callback) {
 
-    vac.discoverasterisk.getBoxIP('boxid_unused',function(err,asteriskip){
+    log.it("trace_listendpoint_list",{boxid: boxid});
+    vac.discoverasterisk.getBoxIP(boxid,function(err,asteriskip){
 
       if (!err) {
         
@@ -193,7 +195,7 @@ module.exports = function(vac, opts, log) {
 
   var deleteEndPoint = function(boxid,username,callback) {
 
-     vac.discoverasterisk.getBoxIP('boxid_unused',function(err,asteriskip){
+     vac.discoverasterisk.getBoxIP(boxid,function(err,asteriskip){
 
       if (!err) {
 

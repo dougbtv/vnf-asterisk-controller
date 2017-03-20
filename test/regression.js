@@ -167,15 +167,15 @@ module.exports = {
       }
     
       test.ok(res.statusCode == 200, "discover returns 200 OK");
-      test.ok(typeof data[0].uuid == 'string', "discover first element uuid is a string");
-      var uuid_firstinstance = data[0].uuid;
+      test.ok(typeof data[0].uuid == 'string', "discover first element uuid is a string (" + data[0].uuid + ")");
+      uuid_firstinstance = data[0].uuid;
       test.done();
 
     });
   },
   pushConfigOK: function(test){
   
-    client.get('/pushconfig/', function(err, req, res, data) {
+    client.get('/pushconfig/' + uuid_firstinstance + '/alice', function(err, req, res, data) {
 
       if (err) {
         test.ok(false, "Restify error: " + err);
@@ -188,7 +188,7 @@ module.exports = {
   },
   listConfigOK: function(test){
   
-    client.get('/getconfig', function(err, req, res, data) {
+    client.get('/getconfig/' + uuid_firstinstance + '/alice', function(err, req, res, data) {
 
       if (err) {
         test.ok(false, "Restify error: " + err);
@@ -200,7 +200,7 @@ module.exports = {
   },
   deleteConfigOK: function(test){
   
-    client.get('/deleteconfig', function(err, req, res, data) {
+    client.get('/deleteconfig/' + uuid_firstinstance + '/alice', function(err, req, res, data) {
 
       if (err) {
         test.ok(false, "Restify error: " + err);

@@ -71,13 +71,13 @@ module.exports = function(vac, opts, log) {
     );
 
     var endpoints = [
-      { route: '/foo',             method: this.testFunction },
-      { route: '/pushconfig',         method: this.pushConfig },
-      { route: '/getconfig',         method: this.getConfig },
-      { route: '/deleteconfig',         method: this.deleteConfig },
-      { route: '/discover',         method: this.discoverAll },
-      { route: '/version',           method: this.version },
-      { route: '/list/:query',         method: this.list },
+      { route: '/foo',                                  method: this.testFunction },
+      { route: '/pushconfig/:boxid/:username',          method: this.pushConfig },
+      { route: '/getconfig/:boxid/:username',           method: this.getConfig },
+      { route: '/deleteconfig/:boxid/:username',        method: this.deleteConfig },
+      { route: '/discover',                             method: this.discoverAll },
+      { route: '/version',                              method: this.version },
+      { route: '/list/:query',                          method: this.list },
     ];
 
     endpoints.forEach(function(point){
@@ -109,7 +109,7 @@ module.exports = function(vac, opts, log) {
 
   this.pushConfig = function(req, res, next) {
 
-    vac.pushconfig.createEndPoint('boxid_unused_fornow','alice','supersecret',function(err){
+    vac.pushconfig.createEndPoint(req.params.boxid,req.params.username,'supersecret',function(err){
 
       if (!err) {
         // Return a JSON result.
@@ -125,7 +125,7 @@ module.exports = function(vac, opts, log) {
 
   this.getConfig = function(req, res, next) {
 
-    vac.pushconfig.listEndPoint('boxid_unused_fornow','alice',function(err,info){
+    vac.pushconfig.listEndPoint(req.params.boxid,req.params.username,function(err,info){
 
       if (!err) {
         // Return a JSON result.
@@ -143,7 +143,7 @@ module.exports = function(vac, opts, log) {
   
   this.deleteConfig = function(req, res, next) {
 
-    vac.pushconfig.deleteEndPoint('boxid_unused_fornow','alice',function(err){
+    vac.pushconfig.deleteEndPoint(req.params.boxid,req.params.username,function(err){
 
       if (!err) {
         // Return a JSON result.
