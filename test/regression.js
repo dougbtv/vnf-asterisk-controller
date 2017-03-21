@@ -45,6 +45,7 @@ if (startserver) {
 // Used among tests.
 
 var uuid_firstinstance;
+var ipaddr_secondinstance;
 
 var uploadFile = function(query,upload_path,backup_filepath,test,callback) {
 
@@ -165,15 +166,18 @@ module.exports = {
       }
     
       test.ok(res.statusCode == 200, "discover returns 200 OK");
+      test.ok(data.length == 2,"two asterisk instances discovered");
       test.ok(typeof data[0].uuid == 'string', "discover first element uuid is a string (" + data[0].uuid + ")");
+      test.ok(data[1].ip.match(/^\d+\.\d+\.\d+\.\d+$/),"second element's IP address looks like an IP (" + data[1].ip + ")");
       uuid_firstinstance = data[0].uuid;
+      ipaddr_secondinstance = data[1].ip;
       test.done();
 
     });
   },
   pushConfigOK: function(test){
   
-    client.get('/pushconfig/' + uuid_firstinstance + '/alice', function(err, req, res, data) {
+    client.get('/pushconfig/' + uuid_firstinstance + '/alice/' + ipaddr_secondinstance + '/32', function(err, req, res, data) {
 
       if (err) {
         test.ok(false, "Restify error: " + err);

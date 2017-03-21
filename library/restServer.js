@@ -71,13 +71,13 @@ module.exports = function(vac, opts, log) {
     );
 
     var endpoints = [
-      { route: '/foo',                                  method: this.testFunction },
-      { route: '/pushconfig/:boxid/:username',          method: this.pushConfig },
-      { route: '/getconfig/:boxid/:username',           method: this.getConfig },
-      { route: '/deleteconfig/:boxid/:username',        method: this.deleteConfig },
-      { route: '/discover',                             method: this.discoverAll },
-      { route: '/version',                              method: this.version },
-      { route: '/list/:query',                          method: this.list },
+      { route: '/foo',                                          method: this.testFunction },
+      { route: '/pushconfig/:boxid/:username/:address/:mask',   method: this.pushConfig },
+      { route: '/getconfig/:boxid/:username',                   method: this.getConfig },
+      { route: '/deleteconfig/:boxid/:username',                method: this.deleteConfig },
+      { route: '/discover',                                     method: this.discoverAll },
+      { route: '/version',                                      method: this.version },
+      { route: '/list/:query',                                  method: this.list },
     ];
 
     endpoints.forEach(function(point){
@@ -109,12 +109,20 @@ module.exports = function(vac, opts, log) {
 
   this.pushConfig = function(req, res, next) {
 
-    vac.pushconfig.createEndPoint(req.params.boxid,req.params.username,'supersecret',function(err,result){
+    vac.pushconfig.createEndPoint(req.params.boxid,req.params.username,req.params.address,req.params.mask,function(err,result){
 
       if (!err) {
         // Return a JSON result.
         res.contentType = 'json';
-        res.send({created_username: req.params.username, box_created: req.params.boxid, result_data: result});
+        res.send({
+          created_username: req.params.username, 
+          info: {
+            uuid: req.params.boxid,
+            address: req.params.address,
+            mask: req.params.mask,
+          },
+          result_data: result
+        });
       } else {
         res.send(500, err);
       }

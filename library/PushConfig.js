@@ -11,7 +11,7 @@ module.exports = function(vac, opts, log) {
   // More info @ https://wiki.asterisk.org/wiki/display/AST/ARI+Push+Configuration
   // And the blog: http://blogs.asterisk.org/2016/03/09/pushing-pjsip-configuration-with-ari/
 
-  var createEndPoint = function(boxid,username,password,callback) {
+  var createEndPoint = function(boxid,username,address,mask,callback) {
 
     log.it("trace_listendpoint_create",{boxid: boxid});
     vac.discoverasterisk.getBoxIP(boxid,function(err,asteriskip){
@@ -81,12 +81,10 @@ module.exports = function(vac, opts, log) {
 
                   var url = server_url + "/ari/asterisk/config/dynamic/res_pjsip/identify/" + username;
 
-                  log.warn("pushconfig_wtf_ipaddress",{ note: "using match as 127.0.0.1 --- THIS IS RIDICULOUS?"});
-
                   var formData = {
                     fields: [
                       { attribute: "endpoint", value: username },
-                      { attribute: "match", value: "127.0.0.1/32" },
+                      { attribute: "match", value: address + "/" + mask },
                     ]
                   };
 
@@ -108,6 +106,45 @@ module.exports = function(vac, opts, log) {
                   });
                  
                 },
+                // -------------------------------- Create AORs
+                // Creates an AOR for an endpoint
+                /*
+                curl -X DELETE http://asterisk:asterisk@172.19.0.3:8088/ari/asterisk/config/dynamic/res_pjsip/aor/doug
+                curl -X PUT -H 'Content-Type: application/json' -d '{"fields":[{"attribute":"contact","value":"sip:asterisk2@127.0.0.1:5060"}]}' http://asterisk:asterisk@172.19.0.3:8088/ari/asterisk/config/dynamic/res_pjsip/aor/doug
+                */
+                function(callback){
+
+                  var url = server_url + "/ari/asterisk/config/dynamic/res_pjsip/aor/" + username;
+
+                  log.warn("pushconfig_aor_warning",{note: "we're using a static port 5060 for now, fwiw."});
+                  // user@host:port
+                  var contact_address = 'sip:anyuser@' + address + ':5060';
+
+                  var formData = {
+                    fields: [
+                      { attribute: "contact", value: contact_address },
+                    ]
+                  };
+
+                  // client.put(url, fields, function(err, req, res, data) {
+                  request.put({url: url, json: formData}, function (err, res, data) {
+                    
+                    // log.it("pushconfig_push_debug",{formData: formData, res: res, data: data, url: url});
+                    
+                    if (!err && res.statusCode == 200) {
+                      // Ok, do things.
+                      callback(false,data);
+                    } else {
+                      if (!err) {
+                        err = "pushconfig_aor_statuscode_error_" + res.statusCode;
+                      }
+                      log.error("pushconfig_error_aorurl",{error: err, data: data, statuscode: res.statusCode});
+                      callback(err);
+                    }
+                  });
+                 
+                },
+
               ],function(err,results){
 
                 if (!err) {
@@ -215,6 +252,7 @@ module.exports = function(vac, opts, log) {
               var urls = [];
               urls.push(server_url + "/ari/asterisk/config/dynamic/res_pjsip/endpoint/" + username);
               urls.push(server_url + "/ari/asterisk/config/dynamic/res_pjsip/identify/" + username);
+              urls.push(server_url + "/ari/asterisk/config/dynamic/res_pjsip/aor/" + username);
 
               async.forEach(urls,function(url,callback){
 
