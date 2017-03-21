@@ -4,6 +4,10 @@
 
 A controller for vnf-asterisk. This readme is generally a big fat stub for now.
 
+## API Specification
+
+All the API endpoints are documented with an [API blueprint on Apiary.io](docs.vnfasteriskcontroller.apiary.io)
+
 ## Building & Running it (for development)
 
 This git repo includes a `docker-compose.yml` file, which requires docker-compose v1.9.0 or later, and docker 1.12.0+. 
