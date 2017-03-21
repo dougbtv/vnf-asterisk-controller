@@ -2,9 +2,7 @@
 
 var SERVER_URL = 'http://127.0.0.1';
 var fs = require('fs');
-var fsextra = require('fs.extra');
 var request = require('request');
-var mime = require('mime');
 var async = require('async');
 var restify = require('restify');
 var client; // will later be a restify client.
