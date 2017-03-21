@@ -39,22 +39,43 @@ services:
       -initial-cluster etcd0=http://172.17.0.1:2380
       -initial-cluster-state new
   # --------------------------------------------- Asterisk
-  asterisk:
-    container_name: asterisk
+  asterisk1:
+    container_name: asterisk1
     image: "dougbtv/asterisk14"
     volumes:
       - ./docker/asterisk_entrypoint.sh:/entrypoint.sh
       - ./docker/http.conf:/etc/asterisk/http.conf
       - ./docker/ari.conf:/etc/asterisk/ari.conf
+      - ./docker/rtp.conf:/etc/asterisk/rtp.conf
     entrypoint: "/entrypoint.sh"
     depends_on:
       - etcd
     links:
       - etcd
     ports:
-      - "8088:8088"
-      - "5060:5060/udp"
-      - "10000:10001/udp"
+      - "8088"
+      - "5060/udp"
+      - "10000-10010/udp"
+    environment: 
+      TARGET_INTERFACE: "eth0"
+      ETCD_HOSTNAME: "etcd"
+  asterisk2:
+    container_name: asterisk2
+    image: "dougbtv/asterisk14"
+    volumes:
+      - ./docker/asterisk_entrypoint.sh:/entrypoint.sh
+      - ./docker/http.conf:/etc/asterisk/http.conf
+      - ./docker/ari.conf:/etc/asterisk/ari.conf
+      - ./docker/rtp.conf:/etc/asterisk/rtp.conf
+    entrypoint: "/entrypoint.sh"
+    depends_on:
+      - etcd
+    links:
+      - etcd
+    ports:
+      - "8088"
+      - "5060/udp"
+      - "10000-10010/udp"
     environment: 
       TARGET_INTERFACE: "eth0"
       ETCD_HOSTNAME: "etcd"
