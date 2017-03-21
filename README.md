@@ -24,6 +24,14 @@ And you can run it with:
 docker-compose up
 ```
 
+Note that the first time you run this, with the default way that the `docker-compose.yml` file is setup, it will mount the current working directory into the controller container.
+
+Which means that you won't have the local `./node_modules/` folder populated, so you can install the node modules with:
+
+```
+docker exec -it controller npm install
+```
+
 ## nodemon in dev
 
 ```
