@@ -1,61 +1,43 @@
 FORMAT: 1A
-HOST: http://polls.apiblueprint.org/
+HOST: http://not.a.public.api/
 
 # vnf-asterisk-controller
 
-Polls is a simple API allowing consumers to view polls and vote in them.
+VNF asterisk controller API allows you to interact with discovered Asterisk instances, and manage configurations via push configuration.
 
-## Questions Collection [/questions]
+Generally speaking this API does not have auth (you must otherwise protect it using firewalls or other methods) for now as it is a PoC. 
 
-### List All Questions [GET]
+In general you access this using `GET` methods and tag parameters on paths to the API.
+
+```
+      { route: '/pushconfig/:boxid/:username',          method: this.pushConfig },
+      { route: '/getconfig/:boxid/:username',           method: this.getConfig },
+      { route: '/deleteconfig/:boxid/:username',        method: this.deleteConfig },
+      { route: '/discover',                             method: this.discoverAll },
+
+```
+
+## Discover [/discover]
+
+### List All Discovered Asterisk instances [GET]
 
 + Response 200 (application/json)
 
-        [
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 2048
-                    }, {
-                        "choice": "Python",
-                        "votes": 1024
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 512
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 256
-                    }
-                ]
-            }
-        ]
+        [{"uuid":"9c220873-7e1f-4ae7-9aab-bc536e2bf974","ip":"172.19.0.4"}]
 
-### Create a New Question [POST]
+## Push configuration [/pushconfig/{instance_uuid}/{username}]
 
-You may create your own question using this action. It takes a JSON
-object containing a question and a collection of answers in the
-form of choices.
+### Push a new endpoint configuration to an asterisk instance [GET]
 
-+ Request (application/json)
+Using the `uuid` as found using the `/discover` endpoint.
 
-        {
-            "question": "Favourite programming language?",
-            "choices": [
-                "Swift",
-                "Python",
-                "Objective-C",
-                "Ruby"
-            ]
-        }
+Parameters here are:
+
+* `instance_uuid`: As found with `/discover` endpoint
+* `username`: a nickname for the endpoint created
+
 
 + Response 201 (application/json)
-
-    + Headers
-
-            Location: /questions/2
 
     + Body
 
