@@ -34,6 +34,10 @@ docker exec -it controller npm install
 
 ## nodemon in dev
 
+Nodemon can be used while in development to automatically restart the controller application with each change in the files in your clone.
+
+You can run it with:
+
 ```
 nodemon vnf-asterisk-controller.js
 ```
