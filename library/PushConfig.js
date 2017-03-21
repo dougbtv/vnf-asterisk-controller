@@ -73,7 +73,10 @@ module.exports = function(vac, opts, log) {
 
                   
                 },
-                // ------------------------- CREATE IDENTITIES.
+                // ------------------------- CREATE IDENTIFIES.
+                // Example curl.
+                // curl -X PUT -H Content-Type: application/json -d {"fields":[{"attribute":"endpoint","value":"doug"},{"attribute":"match","value":"127.0.0.1/32"}]} http://asterisk:asterisk@172.19.0.4:8088/ari/asterisk/config/dynamic/res_pjsip/identify/doug
+                // [{"attribute":"match","value":"127.0.0.1/255.255.255.255"},{"attribute":"endpoint","value":"doug"},{"attribute":"srv_lookups","value":"true"}]
                 function(callback){
 
                   var url = server_url + "/ari/asterisk/config/dynamic/res_pjsip/identify/" + username;
@@ -81,19 +84,20 @@ module.exports = function(vac, opts, log) {
                   log.warn("pushconfig_wtf_ipaddress",{ note: "using match as 127.0.0.1 --- THIS IS RIDICULOUS?"});
 
                   var formData = {
-                    'endpoint': username,
-                    'match' : "127.0.0.1",
-                  }
+                    fields: [
+                      { attribute: "endpoint", value: username },
+                      { attribute: "match", value: "127.0.0.1/32" },
+                    ]
+                  };
 
                   // client.put(url, fields, function(err, req, res, data) {
-                  request.put({url: url, auth: auth, formData: formData}, function (err, res, data) {
+                  request.put({url: url, json: formData}, function (err, res, data) {
                     
-                    // console.log('%d -> %j', res.statusCode, res.headers);
-                    // console.log('%s', data);
-
+                    // log.it("pushconfig_push_debug",{formData: formData, res: res, data: data, url: url});
+                    
                     if (!err && res.statusCode == 200) {
                       // Ok, do things.
-                      callback(false);
+                      callback(false,data);
                     } else {
                       if (!err) {
                         err = "pushconfig_identify_statuscode_error_" + res.statusCode;
@@ -106,8 +110,12 @@ module.exports = function(vac, opts, log) {
                 },
               ],function(err,results){
 
-                log.it("pushconfig_createnedpoint_complete",{username: username, asteriskip: asteriskip,boxid: boxid});
-                callback(err);
+                if (!err) {
+                  log.it("pushconfig_createnedpoint_complete",{username: username, asteriskip: asteriskip,boxid: boxid});
+                  callback(err,results[1]);
+                } else {
+                  callback(err);
+                }
 
               });
 
@@ -160,9 +168,7 @@ module.exports = function(vac, opts, log) {
 
         request.get({url: url}, function (err, res, data) {
           
-          // console.log('%d -> %j', res.statusCode, res.headers);
-          // console.log('%s', data);
-          log.it("pushconfig_debug_listendpoint", {res: res});
+          // log.it("pushconfig_debug_listendpoint", {res: res});
 
           if (!err) { //  && res.statusCode == 200
             // Alright, so we should determine if it's found or not.

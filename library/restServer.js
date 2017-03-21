@@ -109,12 +109,12 @@ module.exports = function(vac, opts, log) {
 
   this.pushConfig = function(req, res, next) {
 
-    vac.pushconfig.createEndPoint(req.params.boxid,req.params.username,'supersecret',function(err){
+    vac.pushconfig.createEndPoint(req.params.boxid,req.params.username,'supersecret',function(err,result){
 
       if (!err) {
         // Return a JSON result.
         res.contentType = 'json';
-        res.send({created_username: 'alice', box_created: 'boxid_unused_fornow'});
+        res.send({created_username: req.params.username, box_created: req.params.boxid, result_data: result});
       } else {
         res.send(500, err);
       }
@@ -148,7 +148,7 @@ module.exports = function(vac, opts, log) {
       if (!err) {
         // Return a JSON result.
         res.contentType = 'json';
-        res.send({deleted_user: 'alice', deleted_boxid: 'boxid_unused_fornow'});
+        res.send({deleted_username: req.params.username, box_deleted: req.params.boxid});
 
       } else {
         res.send(500, err);
