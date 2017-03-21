@@ -6,7 +6,7 @@ A controller for vnf-asterisk. This readme is generally a big fat stub for now.
 
 ## API Specification
 
-All the API endpoints are documented with an [API blueprint on Apiary.io](docs.vnfasteriskcontroller.apiary.io)
+All the API endpoints are documented with an [API blueprint on Apiary.io](http://docs.vnfasteriskcontroller.apiary.io)
 
 ## Building & Running it (for development)
 
