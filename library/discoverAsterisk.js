@@ -19,12 +19,11 @@ module.exports = function(vac, opts, log) {
     store.get('asterisk/' + boxidentifier + '/ip', function(err, etcdresult) {
     if (!err) {
       
-        log.it("!!!!!!!!!!!!!!!!!!bang",{etcdresult: etcdresult, boxidentifier: boxidentifier});
         log.it("discoverasterisk_test_asteriskip", 'asterisk/' + boxidentifier + '/ip: ' + etcdresult.node.value);
         callback(false,etcdresult.node.value);
 
       } else {
-        log.it("discoverasterisk_etcd_error",err);
+        log.it("discoverasterisk_etcd_ip_error",err);
         callback(err);
       }
     });
@@ -33,6 +32,36 @@ module.exports = function(vac, opts, log) {
   }
 
   var getBoxIP = this.getBoxIP;
+
+  // TODO: This could be refactored to have a get property main method, and then handlers to call that.
+  // e.g. shared with getBoxIP.
+  this.getBoxNickname = function(boxidentifier,callback) {
+
+    store.get('asterisk/' + boxidentifier + '/nickname', function(err, etcdresult) {
+    if (!err) {
+      
+        var node_value;
+        if (etcdresult) {
+          node_value = etcdresult.node.value;
+        } else {
+          // There's no properties for this.
+          node_value = null;
+        }
+
+        log.it("!!!!!!!!!!!!!!!!!!bangerer",{etcdresult: etcdresult, boxidentifier: boxidentifier, key: 'asterisk/' + boxidentifier + '/nickname'});
+        log.it("discoverasterisk_test_asterisknickname", 'asterisk/' + boxidentifier + '/nickname: ' + node_value);
+        callback(false,node_value);
+
+      } else {
+        log.it("discoverasterisk_etcd_nickname_error",err);
+        callback(err);
+      }
+    });
+
+
+  }
+
+  var getBoxNickname = this.getBoxNickname;
 
   
   // Discover all asterisk boxes that have reported in.
@@ -62,16 +91,28 @@ module.exports = function(vac, opts, log) {
           // Now we can cycle those and get all the IPs
           async.eachSeries(uuids,function(uuid,callback){
 
+            // TODO: This could be refactored to use async.series to avoid this pyramid o' deth.
             getBoxIP(uuid,function(err,ip){
 
               if (!err) {
 
-                allinfo.push({
-                  uuid: uuid,
-                  ip: ip,
-                });
+                getBoxNickname(uuid,function(err,nickname){
 
-                callback(false);
+                  if (!err) {
+
+                    allinfo.push({
+                      uuid: uuid,
+                      ip: ip,
+                      nickname: nickname,
+                    });
+                    
+                    callback(false);
+
+                  } else {
+                    callback(err);
+                  }
+
+                });
 
               } else {
                 callback(err);

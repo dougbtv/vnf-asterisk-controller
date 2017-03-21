@@ -23,4 +23,9 @@ UUID=$(cat /proc/sys/kernel/random/uuid)
 echo "Announcing IP location to etcd: $ip_address"
 curl -s -L -X PUT http://$ETCD_HOSTNAME:2379/v2/keys/asterisk/$UUID/ip -d value="$ip_address"
 
+if [ ! -z "$ADVERTISE_NICKNAME" ]; then
+  echo "Announcing nickname to etcd: $ADVERTISE_NICKNAME"
+  curl -s -L -X PUT http://$ETCD_HOSTNAME:2379/v2/keys/asterisk/$UUID/nickname -d value="$ADVERTISE_NICKNAME"
+fi
+
 asterisk -f

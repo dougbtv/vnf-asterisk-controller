@@ -57,6 +57,7 @@ services:
       - "5060/udp"
       - "10000-10010/udp"
     environment: 
+      ADVERTISE_NICKNAME: "asterisk1"
       TARGET_INTERFACE: "eth0"
       ETCD_HOSTNAME: "etcd"
   asterisk2:
@@ -77,5 +78,6 @@ services:
       - "5060/udp"
       - "10000-10010/udp"
     environment: 
+      # ADVERTISE_NICKNAME: "asterisk2"
       TARGET_INTERFACE: "eth0"
       ETCD_HOSTNAME: "etcd"
