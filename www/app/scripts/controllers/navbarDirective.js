@@ -1,4 +1,4 @@
-/* global bowlineApp, moment, io */
+/* global vacApp  */
 vacApp.directive('navbar', function(){
 
   return {
