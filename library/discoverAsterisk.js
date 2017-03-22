@@ -19,7 +19,7 @@ module.exports = function(vac, opts, log) {
     store.get('asterisk/' + boxidentifier + '/ip', function(err, etcdresult) {
     if (!err) {
       
-        log.it("discoverasterisk_test_asteriskip", 'asterisk/' + boxidentifier + '/ip: ' + etcdresult.node.value);
+        // log.it("discoverasterisk_test_asteriskip", 'asterisk/' + boxidentifier + '/ip: ' + etcdresult.node.value);
         callback(false,etcdresult.node.value);
 
       } else {

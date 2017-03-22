@@ -25,7 +25,7 @@ module.exports = function(vac, opts, log) {
             if (!boxinfo.exists) {
 
               var server_url = "http://asterisk:asterisk@" + asteriskip + ":" + opts.sourcery_port;
-              log.it("pushconfig_server_url",{server_url: server_url});
+              // log.it("pushconfig_server_url",{server_url: server_url});
 
               var client = restify.createStringClient({
                 version: '*',
@@ -39,6 +39,9 @@ module.exports = function(vac, opts, log) {
                 pass: 'asterisk',
                 sendImmediately: 'false',
               };
+
+              // Scoped outside series
+              var contact_address;
 
               async.series([
                 // ------------------------- CREATE ENDPOINTS.
@@ -125,7 +128,7 @@ module.exports = function(vac, opts, log) {
 
                   log.warn("pushconfig_aor_warning",{note: "we're using a static port 5060 for now, fwiw."});
                   // user@host:port
-                  var contact_address = 'sip:anyuser@' + address + ':5060';
+                  contact_address = 'sip:anyuser@' + address + ':5060';
 
                   var formData = {
                     fields: [
@@ -154,9 +157,33 @@ module.exports = function(vac, opts, log) {
 
               ],function(err,results){
 
+                // And we're complete with the series.
+
                 if (!err) {
-                  log.it("pushconfig_createnedpoint_complete",{username: username, asteriskip: asteriskip,boxid: boxid});
-                  callback(err,results[1]);
+
+                  // Let's package together what we have about this trunk.
+                  var trunk_info = {
+                    name: username,
+                    boxid: boxid,
+                    box_address: asteriskip,
+                    endpoint: {
+                      context: context,
+                      aors: username,
+                      transport: 'transport-udp',
+                      allow: 'ulaw',
+                      disallow: 'all',
+                    },
+                    identify: {
+                      match: address + "/" + mask,
+                    },
+                    aor: {
+                      contact_address: contact_address,
+                    }
+                  }
+
+                  log.it("pushconfig_createnedpoint_complete",trunk_info);
+                  callback(err,trunk_info);
+
                 } else {
                   callback(err);
                 }
@@ -199,7 +226,6 @@ module.exports = function(vac, opts, log) {
 
   var listEndPoint = function(boxid,endpoint,callback) {
 
-    log.it("trace_listendpoint_list",{boxid: boxid});
     vac.discoverasterisk.getBoxIP(boxid,function(err,asteriskip){
 
       if (!err) {
@@ -208,7 +234,7 @@ module.exports = function(vac, opts, log) {
 
         var url = server_url + "/ari/asterisk/config/dynamic/res_pjsip/endpoint/" + endpoint;
 
-        log.it("requested_URLLLLL",{ url: url});
+        // log.it("requested_URLLLLL",{ url: url});
 
         request.get({url: url}, function (err, res, data) {
           
@@ -263,19 +289,15 @@ module.exports = function(vac, opts, log) {
 
               async.forEach(urls,function(url,callback){
 
-                log.it("requested_URLLLLL",{ url: url});
-
                 // Call the endpoint with the delete method to remove it.
                 request.delete({url: url}, function (err, res, data) {
                   
-                  // console.log('%d -> %j', res.statusCode, res.headers);
-                  // console.log('%s', data);
-                  log.it("pushconfig_debug_delete_listendpoint", {res: res});
+                  // log.it("pushconfig_debug_delete_listendpoint", {res: res});
 
                   if (!err) { //  && res.statusCode == 200
                    
                     // Warn if not 200 OK
-                    if (res.statusCode != 200) { 
+                    if (res.statusCode > 204 || res.statusCode < 200) { 
                       log.warn("pushconfig_delete_non200",{statusCode: res.statusCode, data: data, url: url});
                     }
                     
