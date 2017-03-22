@@ -51,15 +51,17 @@ module.exports = function(vac, opts, log) {
                   var url = server_url + "/ari/asterisk/config/dynamic/res_pjsip/endpoint/" + username;
 
                   var formData = {
-                    'transport': 'transport-udp',
-                    'context': context,
-                    'aors': username,
-                    'disallow': 'all',
-                    'allow': 'ulaw',
+                    fields: [
+                      { attribute: 'transport', value: 'transport-udp' },
+                      { attribute: 'context', value: context },
+                      { attribute: 'aors', value: username },
+                      { attribute: 'disallow', value: 'all' },
+                      { attribute: 'allow', value: 'ulaw' },
+                    ]
                   }
 
                   // client.put(url, fields, function(err, req, res, data) {
-                  request.put({url: url, auth: auth, formData: formData}, function (err, res, data) {
+                  request.put({url: url, json: formData}, function (err, res, data) {
                     
                     // console.log('%d -> %j', res.statusCode, res.headers);
                     // console.log('%s', data);
