@@ -200,6 +200,19 @@ module.exports = {
       test.done();
     });
   },
+  getTrunkInfo: function(test){
+  
+    client.get('/gettrunk/' + uuid_firstinstance + '/alice', function(err, req, res, data) {
+
+      if (err) {
+        test.ok(false, "Restify error: " + err);
+      }
+    
+      test.ok(data.name == 'alice',"returns same name as entered (alice)");
+      test.ok(res.statusCode == 200, "gettrunk returns 200 OK");
+      test.done();
+    });
+  },
   deleteConfigOK: function(test){
   
     client.get('/deleteconfig/' + uuid_firstinstance + '/alice', function(err, req, res, data) {
@@ -209,6 +222,19 @@ module.exports = {
       }
     
       test.ok(res.statusCode == 200, "deleteconfig returns 200 OK");
+      test.done();
+    });
+  },
+  getTrunkInfoAfterDelete: function(test){
+  
+    client.get('/gettrunk/' + uuid_firstinstance + '/alice', function(err, req, res, data) {
+
+      if (err) {
+        test.ok(false, "Restify error: " + err);
+      }
+    
+      test.ok(Object.keys(data).length === 0 && data.constructor === Object,"Trunk info is empty");
+      test.ok(res.statusCode == 200, "gettrunk returns 200 OK");
       test.done();
     });
   },

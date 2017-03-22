@@ -50,10 +50,10 @@ With a running server...
 
 ```
 export NOSERVER=1
-grunt test
+grunt nodeunit
 ```
 
-Without a running server, just use `grunt test`
+Without a running server, just use `grunt nodeunit`
 
 ## Application structure, namespaces, and naming conventions.
 

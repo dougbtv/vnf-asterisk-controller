@@ -75,6 +75,7 @@ module.exports = function(vac, opts, log) {
       { route: '/pushconfig/:boxid/:username/:address/:mask/:context',    method: this.pushConfig },
       { route: '/getconfig/:boxid/:username',                             method: this.getConfig },
       { route: '/deleteconfig/:boxid/:username',                          method: this.deleteConfig },
+      { route: '/gettrunk/:boxid/:trunkname',                             method: this.getTrunk },
       { route: '/discover',                                               method: this.discoverAll },
       { route: '/version',                                                method: this.version },
       { route: '/list/:query',                                            method: this.list },
@@ -148,6 +149,22 @@ module.exports = function(vac, opts, log) {
 
   }
 
+  this.getTrunk = function(req, res, next) {
+
+    vac.discoverasterisk.getStoredTrunk(req.params.boxid,req.params.trunkname,function(err,info){
+
+      if (!err) {
+        // Return a JSON result.
+        res.contentType = 'json';
+        res.send(info);
+
+      } else {
+        res.send(500, err);
+      }
+
+    });
+
+  }
   
   this.deleteConfig = function(req, res, next) {
 

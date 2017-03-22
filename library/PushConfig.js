@@ -181,8 +181,18 @@ module.exports = function(vac, opts, log) {
                     }
                   }
 
-                  log.it("pushconfig_createnedpoint_complete",trunk_info);
-                  callback(err,trunk_info);
+                  vac.discoverasterisk.storeTrunk(boxid,username,trunk_info,function(err){
+
+                    if (!err) {
+
+                      log.it("pushconfig_createnedpoint_complete",trunk_info);
+                      callback(err,trunk_info);
+
+                    } else {
+                      callback(err);
+                    }
+
+                  });
 
                 } else {
                   callback(err);
@@ -315,11 +325,16 @@ module.exports = function(vac, opts, log) {
               },function(err){
 
                 // Ok, that's all done.
+                // Let's delete it from the etcd record.
                 if (!err) {
-                  log.it("pushconfig_delete_complete",{boxid: boxid, username: username});
+                  vac.discoverasterisk.deleteStoredTrunk(boxid,username,function(err){
+                    log.it("pushconfig_delete_complete",{boxid: boxid, username: username});
+                    callback(err);
+                  });
+                } else {
+                  callback(err);
                 }
 
-                callback(err);
 
               });
 

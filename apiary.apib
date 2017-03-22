@@ -15,13 +15,14 @@ This document also provides a "mock api" -- if you view the details of a specifi
 
 ## Discover [/discover]
 
-The discover endpoint allows you to list the Asterisk instances that have reported to etcd, and give you their unique ID, and the IP address on which they're listening for VoIP traffic.
+The discover endpoint allows you to list the Asterisk instances that have reported to etcd, and give you their unique ID (a UUID), an optional nickname, and the IP address on which they're listening for VoIP traffic, as well as a list of trunks configered on each instance.
 
 ### List All Discovered Asterisk instances [GET]
 
 + Response 200 (application/json)
 
-        [{"uuid":"9c220873-7e1f-4ae7-9aab-bc536e2bf974","ip":"172.19.0.4"}]
+        [{"uuid":"a66faf87-46dd-416f-a746-2692a503d1c1","ip":"172.19.0.4","nickname":"asterisk1","trunks":["alice"]},{"uuid":"3bac1d88-aef2-494d-a1f7-8d7046aebfa9","ip":"172.19.0.5","nickname":"asterisk2","trunks":[]}]
+
 
 ## Push configuration [/pushconfig/{instance_uuid}/{username}/{ip_address}/{mask_bits}]
 
@@ -81,3 +82,20 @@ Parameters here are:
     + Body
 
             {"deleted_username":"alice","box_deleted":"9c220873-7e1f-4ae7-9aab-bc536e2bf974"}
+
+## Get Trunk Information [/gettrunk/{instance_uuid}/{trunk_name}]
+
+This allows you to get information about a trunk 
+
+### Retreive detailed trunk information [GET]
+
+Parameters here are:
+
+* `instance_uuid`: As found with `/discover` endpoint
+* `trunk_name`: the trunkname, as used previously with push, and listed in the `/discover` endpoint.
+
++ Response 200 (application/json)
+
+    + Body
+
+            {"name":"alice","boxid":"86faa28d-4cf4-4b3b-ae8b-08a20c4c2426","box_address":"172.19.0.3","endpoint":{"context":"inbound","aors":"alice","transport":"transport-udp","allow":"ulaw","disallow":"all"},"identify":{"match":"172.19.0.5/32"},"aor":{"contact_address":"sip:anyuser@172.19.0.5:5060"}}
