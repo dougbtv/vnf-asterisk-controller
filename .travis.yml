@@ -26,14 +26,23 @@ before_install:
 script:
   # For debug...
   - ip a
-  # Builds the 
+  # Builds the image(s)
   - docker-compose build
   # You can add environment variables with: -e DEBUG=1
   - docker-compose up -d
-  # Runs the unit tests
   - mkdir node_modules
+  # Install the npm modules, as we're running locally
   - docker exec -it controller npm install --silent
+  # Runs the unit tests
   - docker exec -it controller grunt nodeunit
+  # Originate a call
+  - docker exec -it asterisk1 asterisk -rx 'channel originate PJSIP/333@asterisk2 application playback tt-monkeys'
+  # Wait for the call to complete (believe it takes 16 seconds, we'll give it some padding)
+  - sleep 20
+  # Check out the size of the call recording (should have a known size.)
+  - docker exec -it asterisk2 /bin/bash -c 'stat -c "%s" /var/spool/asterisk/monitor/test.ulaw' | grep 131680
+  # See that the CDR looks ok, that we got a call across.
+  - docker exec -it asterisk2 grep -Pi "333.+inbound.+ANSWERED" /var/log/asterisk/cdr-csv/Master.csv
   
 
   # ----------------------------------------------------- OLD REFERENCE.

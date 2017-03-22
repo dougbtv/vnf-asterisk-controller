@@ -1,19 +1,121 @@
 module.exports = function(vac, opts, log) {
-
   
   // we use the restify client.
   var restify = require('restify');
   var request = require('request');
   var async = require('async');
 
+  // Connect two instances of astserisk by creating a trunk on each one to the other one.
+  var connectInstances = function(instance_uuid_a,instance_uuid_b,context,callback) {
+
+    // Alright, steps we need.
+    // - Get info from discover all
+    // - Associate items with instances
+    // - Create trunk on A to B
+    // - Create trunk on B to A
+
+    // Some vars used across the series.
+    var discovered;
+    var info_a = null;
+    var info_b = null;
+
+    async.series({
+      // Get info from discover all.
+      discover: function(callback) {
+        vac.discoverasterisk.discoverAll(function(err,discover_result){
+          discovered = discover_result;
+          callback(err);
+        });
+      },
+      // Asociate discovered info with each instance.
+      associate: function(callback) {
+
+        if (discovered.length >= 2) {
+
+          discovered.forEach(function(each_discovered){
+
+            if (each_discovered.uuid == instance_uuid_a) {
+              info_a = each_discovered;
+            }
+
+            if (each_discovered.uuid == instance_uuid_b) {
+              info_b = each_discovered;
+            }
+
+          });
+
+          if (info_a && info_b) {
+
+            // alright, that looks like we have information for both instances.
+            callback(false);
+
+          } else {
+            log.error("pushconfig_connect_error_nomatch",{ instance_uuid_a: instance_uuid_b, instance_uuid_b: instance_uuid_b, info_a: info_a, info_b, note: "no match for one or more instances"});
+            callback("pushconfig_connect_error_nomatch");
+          }
+
+        } else {
+          log.error("pushconfig_connect_error_notenoughinstances",{discovered: discovered, note: "there needs to be 2 or more instances to connect them"});
+          callback("pushconfig_connect_error_notenoughinstances");
+        }
+
+      },
+      // Create a trunk on instance A for instance B's info.
+      create_trunk_a: function(callback) {
+
+        // Give the trunk a cute name if you can.
+        var trunkname = instance_uuid_b;
+        if (info_b.nickname) {
+          trunkname = info_b.nickname;
+        }
+
+        // Now go and create it.
+        createEndPoint(instance_uuid_a,trunkname,info_b.ip,'32',context,function(err,result){
+          callback(err,result);
+        });
+
+      },
+      // Create a trunk on instance A for instance B's info.
+      create_trunk_b: function(callback) {
+
+        // Give the trunk a cute name if you can.
+        var trunkname = instance_uuid_a;
+        if (info_a.nickname) {
+          trunkname = info_a.nickname;
+        }
+
+        // Now go and create it.
+        createEndPoint(instance_uuid_b,trunkname,info_a.ip,'32',context,function(err,result){
+          callback(err,result);
+        });
+
+      },
+    },function(err,result){
+
+      // And we're all finished.
+
+      if (!err) {
+        var returns = {create_trunk_a: result.create_trunk_a, create_trunk_b: result.create_trunk_b};
+        log.it("pushconfig_connect_complete",returns);
+        callback(false,returns);
+      } else {
+        log.error("pushconfig_connect_serieserror",{err: err});
+        callback(err);
+      }
+
+
+    });
+
+  }
+
+  this.connectInstances = connectInstances;
+
   // Dynamically create an endpoint with pjsip.
 
   // More info @ https://wiki.asterisk.org/wiki/display/AST/ARI+Push+Configuration
   // And the blog: http://blogs.asterisk.org/2016/03/09/pushing-pjsip-configuration-with-ari/
-
   var createEndPoint = function(boxid,username,address,mask,context,callback) {
 
-    log.it("trace_listendpoint_create",{boxid: boxid});
     vac.discoverasterisk.getBoxIP(boxid,function(err,asteriskip){
 
       if (!err) {

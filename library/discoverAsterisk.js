@@ -48,8 +48,7 @@ module.exports = function(vac, opts, log) {
           node_value = null;
         }
 
-        log.it("!!!!!!!!!!!!!!!!!!bangerer",{etcdresult: etcdresult, boxidentifier: boxidentifier, key: 'asterisk/' + boxidentifier + '/nickname'});
-        log.it("discoverasterisk_test_asterisknickname", 'asterisk/' + boxidentifier + '/nickname: ' + node_value);
+        // log.it("discoverasterisk_test_asterisknickname", 'asterisk/' + boxidentifier + '/nickname: ' + node_value);
         callback(false,node_value);
 
       } else {
@@ -125,6 +124,7 @@ module.exports = function(vac, opts, log) {
 
     store.get('asterisk/' + boxid + '/trunks',function(err, etcdresult){
 
+
       if (!err) {
 
         if (etcdresult) {
@@ -132,7 +132,10 @@ module.exports = function(vac, opts, log) {
           // Ok, no get the keys outta there.
           var trunknames = [];
 
-          if (etcdresult.result) {
+          log.it("!trace",{etcdresult: etcdresult});
+
+          if (typeof etcdresult.node.nodes !== 'undefined') {
+
             etcdresult.node.nodes.forEach(function(keyinfo){
 
               var eachtrunk = keyinfo.key.replace(/^.+\/([a-z0-9\-]+$)/,'$1');
@@ -140,6 +143,7 @@ module.exports = function(vac, opts, log) {
               trunknames.push(eachtrunk);
 
             });
+            
           }
 
           callback(false,trunknames);
@@ -163,10 +167,6 @@ module.exports = function(vac, opts, log) {
   
   // Discover all asterisk boxes that have reported in.
   this.discoverAll = function(callback) {
-
-    store.get('asterisk',{recursive: true},function(err, etcdresult){
-      log.it("!trace_recursive_get",{etcdresult: etcdresult});
-    });
 
     store.get('asterisk',function(err, etcdresult){
 

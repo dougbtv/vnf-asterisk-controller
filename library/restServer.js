@@ -75,6 +75,7 @@ module.exports = function(vac, opts, log) {
       { route: '/pushconfig/:boxid/:username/:address/:mask/:context',    method: this.pushConfig },
       { route: '/getconfig/:boxid/:username',                             method: this.getConfig },
       { route: '/deleteconfig/:boxid/:username',                          method: this.deleteConfig },
+      { route: '/connect/:instance_a/:instance_b/:context',               method: this.connectInstances },
       { route: '/gettrunk/:boxid/:trunkname',                             method: this.getTrunk },
       { route: '/discover',                                               method: this.discoverAll },
       { route: '/version',                                                method: this.version },
@@ -124,6 +125,23 @@ module.exports = function(vac, opts, log) {
           },
           result_data: result
         });
+      } else {
+        res.send(500, err);
+      }
+
+    });
+
+  }
+
+  this.connectInstances = function(req, res, next) {
+
+    vac.pushconfig.connectInstances(req.params.instance_a,req.params.instance_b,req.params.context,function(err,info){
+
+      if (!err) {
+        // Return a JSON result.
+        res.contentType = 'json';
+        res.send(info);
+
       } else {
         res.send(500, err);
       }

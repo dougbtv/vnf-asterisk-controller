@@ -24,6 +24,31 @@ The discover endpoint allows you to list the Asterisk instances that have report
         [{"uuid":"a66faf87-46dd-416f-a746-2692a503d1c1","ip":"172.19.0.4","nickname":"asterisk1","trunks":["alice"]},{"uuid":"3bac1d88-aef2-494d-a1f7-8d7046aebfa9","ip":"172.19.0.5","nickname":"asterisk2","trunks":[]}]
 
 
+## Connect two instances with trunks for each instance [/connect/{instance_a_uuid}/{instance_a_uuid}/{context}]
+
+This allows you to push a SIP trunk configuration to two Asterisk instances, creating complimentary trunks for each one. 
+
+If you were connecting, instances called `toyko` and `new_york` -- On the `tokyo` instance, there would be a trunk to `new_york`, and... On the instance for `new_york` there would be an instance to `tokyo`.
+
+### Connect two instances by creating SIP endpoints for each configuration to an Asterisk instance [GET]
+
+Using the `uuid`s for each instance as found using the `/discover` API endpoint we connect two instances.
+
+Parameters here are:
+
+* `instance_a_uuid`: As found with `/discover` API endpoint
+* `instance_b_uuid`: As found with `/discover` API endpoint
+* `context`: The context used for handling inbound calls for the endpoint (must exist in the dialplan for both instances)
+
+Returns a JSON object describing the details of both trunks.
+
++ Response 200 (application/json)
+
+    + Body
+
+            {"create_trunk_a":{"name":"asterisk2","boxid":"835ff6af-48ff-4b7c-ba6f-f8b30732c0b9","box_address":"172.19.0.5","endpoint":{"context":"inbound","aors":"asterisk2","transport":"transport-udp","allow":"ulaw","disallow":"all"},"identify":{"match":"172.19.0.4/32"},"aor":{"contact_address":"sip:anyuser@172.19.0.4:5060"}},"create_trunk_b":{"name":"asterisk1","boxid":"316c9c40-614f-49cb-b554-d0696a8f6f3d","box_address":"172.19.0.4","endpoint":{"context":"inbound","aors":"asterisk1","transport":"transport-udp","allow":"ulaw","disallow":"all"},"identify":{"match":"172.19.0.5/32"},"aor":{"contact_address":"sip:anyuser@172.19.0.5:5060"}}}
+
+
 ## Push configuration [/pushconfig/{instance_uuid}/{username}/{ip_address}/{mask_bits}]
 
 This allows you to push a specific configuration to an Asterisk instance.

@@ -44,7 +44,8 @@ if (startserver) {
 
 // Used among tests.
 
-var uuid_firstinstance;
+var uuid_a;
+var uuid_b;
 var ipaddr_secondinstance;
 
 var uploadFile = function(query,upload_path,backup_filepath,test,callback) {
@@ -169,7 +170,8 @@ module.exports = {
       test.ok(data.length == 2,"two asterisk instances discovered");
       test.ok(typeof data[0].uuid == 'string', "discover first element uuid is a string (" + data[0].uuid + ")");
       test.ok(data[1].ip.match(/^\d+\.\d+\.\d+\.\d+$/),"second element's IP address looks like an IP (" + data[1].ip + ")");
-      uuid_firstinstance = data[0].uuid;
+      uuid_a = data[0].uuid;
+      uuid_b = data[1].uuid;
       ipaddr_secondinstance = data[1].ip;
       test.done();
 
@@ -177,7 +179,7 @@ module.exports = {
   },
   pushConfigOK: function(test){
   
-    client.get('/pushconfig/' + uuid_firstinstance + '/alice/' + ipaddr_secondinstance + '/32/inbound', function(err, req, res, data) {
+    client.get('/pushconfig/' + uuid_a + '/alice/' + ipaddr_secondinstance + '/32/inbound', function(err, req, res, data) {
 
       if (err) {
         test.ok(false, "Restify error: " + err);
@@ -190,7 +192,7 @@ module.exports = {
   },
   listConfigOK: function(test){
   
-    client.get('/getconfig/' + uuid_firstinstance + '/alice', function(err, req, res, data) {
+    client.get('/getconfig/' + uuid_a + '/alice', function(err, req, res, data) {
 
       if (err) {
         test.ok(false, "Restify error: " + err);
@@ -202,7 +204,7 @@ module.exports = {
   },
   getTrunkInfo: function(test){
   
-    client.get('/gettrunk/' + uuid_firstinstance + '/alice', function(err, req, res, data) {
+    client.get('/gettrunk/' + uuid_a + '/alice', function(err, req, res, data) {
 
       if (err) {
         test.ok(false, "Restify error: " + err);
@@ -215,7 +217,7 @@ module.exports = {
   },
   deleteConfigOK: function(test){
   
-    client.get('/deleteconfig/' + uuid_firstinstance + '/alice', function(err, req, res, data) {
+    client.get('/deleteconfig/' + uuid_a + '/alice', function(err, req, res, data) {
 
       if (err) {
         test.ok(false, "Restify error: " + err);
@@ -227,7 +229,7 @@ module.exports = {
   },
   getTrunkInfoAfterDelete: function(test){
   
-    client.get('/gettrunk/' + uuid_firstinstance + '/alice', function(err, req, res, data) {
+    client.get('/gettrunk/' + uuid_a + '/alice', function(err, req, res, data) {
 
       if (err) {
         test.ok(false, "Restify error: " + err);
@@ -236,6 +238,27 @@ module.exports = {
       test.ok(Object.keys(data).length === 0 && data.constructor === Object,"Trunk info is empty");
       test.ok(res.statusCode == 200, "gettrunk returns 200 OK");
       test.done();
+    });
+  },
+  connectTwoInstances: function(test){
+  
+    client.get('/connect/' + uuid_a + '/' + uuid_b + '/inbound', function(err, req, res, data) {
+
+      if (err) {
+        test.ok(false, "Restify error: " + err);
+      }
+    
+      test.ok(res.statusCode == 200, "connect returns 200 OK");
+
+      if (typeof data.create_trunk_a !== 'undefined') {
+        test.ok(data.create_trunk_a.name == 'asterisk1' || data.create_trunk_a.name == 'asterisk2', "Trunk A name matches");
+        test.ok(data.create_trunk_b.name == 'asterisk1' || data.create_trunk_b.name == 'asterisk2', "Trunk B name matches");
+      } else {
+        test.ok(false,"Wonky return (likely trunks already exist)");
+      }
+
+      test.done();
+      
     });
   },
   serverKill: function(test) {
