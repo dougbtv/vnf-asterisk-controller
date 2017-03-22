@@ -177,7 +177,7 @@ module.exports = {
   },
   pushConfigOK: function(test){
   
-    client.get('/pushconfig/' + uuid_firstinstance + '/alice/' + ipaddr_secondinstance + '/32', function(err, req, res, data) {
+    client.get('/pushconfig/' + uuid_firstinstance + '/alice/' + ipaddr_secondinstance + '/32/inbound', function(err, req, res, data) {
 
       if (err) {
         test.ok(false, "Restify error: " + err);

@@ -11,7 +11,7 @@ module.exports = function(vac, opts, log) {
   // More info @ https://wiki.asterisk.org/wiki/display/AST/ARI+Push+Configuration
   // And the blog: http://blogs.asterisk.org/2016/03/09/pushing-pjsip-configuration-with-ari/
 
-  var createEndPoint = function(boxid,username,address,mask,callback) {
+  var createEndPoint = function(boxid,username,address,mask,context,callback) {
 
     log.it("trace_listendpoint_create",{boxid: boxid});
     vac.discoverasterisk.getBoxIP(boxid,function(err,asteriskip){
@@ -41,14 +41,19 @@ module.exports = function(vac, opts, log) {
               };
 
               async.series([
-                  // ------------------------- CREATE ENDPOINTS.
+                // ------------------------- CREATE ENDPOINTS.
+                // From the manual.
+                /*
+                $ curl -X PUT -H "Content-Type: application/json" -u asterisk:secret -d '{"fields": [ { "attribute": "from_user", "value": "alice" }, { "attribute": "allow", "value": "!all,g722,ulaw,alaw"}, {"attribute": "ice_support", "value": "yes"}, {"attribute": "force_rport", "value": "yes"}, {"attribute": "rewrite_contact", "value": "yes"}, {"attribute": "rtp_symmetric", "value": "yes"}, {"attribute": "context", "value": "default" }, {"attribute": "auth", "value": "alice" }, {"attribute": "aors", "value": "alice"} ] }' https://localhost:8088/ari/asterisk/config/dynamic/res_pjsip/endpoint/alice
+                */
                 function(callback){
 
                   var url = server_url + "/ari/asterisk/config/dynamic/res_pjsip/endpoint/" + username;
 
                   var formData = {
                     'transport': 'transport-udp',
-                    'context': 'endpoints',
+                    'context': context,
+                    'aors': username,
                     'disallow': 'all',
                     'allow': 'ulaw',
                   }

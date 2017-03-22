@@ -47,6 +47,8 @@ services:
       - ./docker/http.conf:/etc/asterisk/http.conf
       - ./docker/ari.conf:/etc/asterisk/ari.conf
       - ./docker/rtp.conf:/etc/asterisk/rtp.conf
+      - ./docker/extensions.conf:/etc/asterisk/extensions.conf
+      - ./docker/pjsip.conf:/etc/asterisk/pjsip.conf
     entrypoint: "/entrypoint.sh"
     depends_on:
       - etcd
@@ -68,6 +70,8 @@ services:
       - ./docker/http.conf:/etc/asterisk/http.conf
       - ./docker/ari.conf:/etc/asterisk/ari.conf
       - ./docker/rtp.conf:/etc/asterisk/rtp.conf
+      - ./docker/extensions.conf:/etc/asterisk/extensions.conf
+      - ./docker/pjsip.conf:/etc/asterisk/pjsip.conf
     entrypoint: "/entrypoint.sh"
     depends_on:
       - etcd

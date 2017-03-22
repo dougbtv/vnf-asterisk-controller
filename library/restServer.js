@@ -71,13 +71,13 @@ module.exports = function(vac, opts, log) {
     );
 
     var endpoints = [
-      { route: '/foo',                                          method: this.testFunction },
-      { route: '/pushconfig/:boxid/:username/:address/:mask',   method: this.pushConfig },
-      { route: '/getconfig/:boxid/:username',                   method: this.getConfig },
-      { route: '/deleteconfig/:boxid/:username',                method: this.deleteConfig },
-      { route: '/discover',                                     method: this.discoverAll },
-      { route: '/version',                                      method: this.version },
-      { route: '/list/:query',                                  method: this.list },
+      { route: '/foo',                                                    method: this.testFunction },
+      { route: '/pushconfig/:boxid/:username/:address/:mask/:context',    method: this.pushConfig },
+      { route: '/getconfig/:boxid/:username',                             method: this.getConfig },
+      { route: '/deleteconfig/:boxid/:username',                          method: this.deleteConfig },
+      { route: '/discover',                                               method: this.discoverAll },
+      { route: '/version',                                                method: this.version },
+      { route: '/list/:query',                                            method: this.list },
     ];
 
     endpoints.forEach(function(point){
@@ -109,7 +109,7 @@ module.exports = function(vac, opts, log) {
 
   this.pushConfig = function(req, res, next) {
 
-    vac.pushconfig.createEndPoint(req.params.boxid,req.params.username,req.params.address,req.params.mask,function(err,result){
+    vac.pushconfig.createEndPoint(req.params.boxid,req.params.username,req.params.address,req.params.mask,req.params.context,function(err,result){
 
       if (!err) {
         // Return a JSON result.
