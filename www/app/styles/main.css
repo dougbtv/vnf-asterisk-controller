@@ -3,7 +3,7 @@ body {
 }
 .starter-template {
   padding: 60px 15px;
-  text-align: center;
+  /* text-align: center; */
 }
 
 .navbar-custombrand {
@@ -12,6 +12,10 @@ body {
   padding: 5px 15px;
   font-size: 18px;
   line-height: 20px;
+}
+
+.tinytext {
+  font-size: 11px;
 }
 
 /* -------------------------------------------- templated below ------------------- */

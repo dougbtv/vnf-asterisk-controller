@@ -11,14 +11,7 @@
 
 vacApp.controller('MainCtrl', ['$scope', '$location', '$http', '$routeParams', function($scope,$location,$http,$routeParams) {
 
-  console.log($location.path());
+  // this is the main controller.
+  // it's the first thing that comes up, but, right now it's just a view.
 
-  this.awesomeThings = [
-    'HTML5 Boilerplate',
-    'AngularJS',
-    'Karma'
-  ];
-
-  console.log("main controller");
-  
 }]);
