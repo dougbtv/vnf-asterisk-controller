@@ -16,5 +16,7 @@ vacApp.controller('AboutCtrl', ['$scope', '$location', '$http', '$routeParams', 
       'Karma'
     ];
 
+    $scope.foo = "bar!!!";
+
     console.log("about controller");
 }]);
