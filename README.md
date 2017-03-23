@@ -2,7 +2,9 @@
 
 [![Build Status](https://travis-ci.org/dougbtv/vnf-asterisk-controller.svg?branch=master)](https://travis-ci.org/dougbtv/vnf-asterisk-controller)
 
-A controller for vnf-asterisk. This readme is generally a big fat stub for now.
+![vac_logo][vac_logo]
+
+A controller for vnf-asterisk.
 
 ## API Specification
 
@@ -32,7 +34,7 @@ Which means that you won't have the local `./node_modules/` folder populated, so
 docker exec -it controller npm install
 ```
 
-## nodemon in dev
+## Back-end nodemon in dev
 
 Nodemon can be used while in development to automatically restart the controller application with each change in the files in your clone.
 
@@ -44,7 +46,7 @@ nodemon vnf-asterisk-controller.js
 
 ## Unit tests
 
-This project includes unit tests. [stub!]
+This project includes unit tests for the backend.
 
 With a running server...
 
@@ -54,6 +56,24 @@ grunt nodeunit
 ```
 
 Without a running server, just use `grunt nodeunit`
+
+## Developing the front-end
+
+The front-end resides entirely within the `./www` folder. It's an AngularJS app that's been scaffolded with Yeoman's [generator-angular](https://github.com/yeoman/generator-angular).
+
+First, make sure you have the back-end dependencies installed (particularly, grunt). To initialize the front-end, cd to the `./www` folder and run...
+
+```
+npm install -g 
+npm install
+bower install
+```
+
+You can then serve the front-end (and refresh the page automatically when code changes) using the `serve` command with grunt, e.g.
+
+```
+grunt serve
+```
 
 ## Application structure, namespaces, and naming conventions.
 
@@ -102,3 +122,6 @@ Sample of how parent / children relate, especially the modules to the singleton 
 
 ```
 
+
+
+[vac_logo]: docs/vnf-asterisk-controller-logo.png

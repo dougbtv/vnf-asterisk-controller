@@ -1,0 +1,50 @@
+<div class="col-sm-12">
+  <div class="row">
+    <h3>Discovered Asterisk Instances</h3>
+  </div>
+
+  <div class="row panel panel-primary" ng-repeat="instance in instances">
+
+    <!-- panel -->
+    <div class="panel-heading">
+      <h3 class="panel-title">{{ instance.nickname ? instance.nickname : instance.uuid }}</h3>
+    </div>
+    <div class="panel-body">
+      
+      <p>Located @ {{ instance.ip }}</p>
+      <p class="tinytext">Unique ID: {{ instance.uuid }}</p>
+
+      <span ng-if="instance.trunks.length">
+        <hr />
+        <p><strong>Trunks</strong></p>
+        <div class="list-group" ng-repeat="trunk in instance.trunks">
+              <span class="list-group-item">
+                <h4 class="list-group-item-heading">{{ trunk.name }}</h4>
+                <hr />
+                <div class="container">
+                  <div class="col-sm-4">
+                    <p><strong>Endpoint</strong></p>
+                    <p>Context: <code>{{ trunk.endpoint.context }}</code></p>
+                    <p>Transport: <code>{{ trunk.endpoint.transport }}</code></p>
+                    <p>Allows: <code>{{ trunk.endpoint.allow }}</code></p>
+                    <p>Disallows: <code>{{ trunk.endpoint.disallow }}</code></p>
+                    <p>aors: <code>{{ trunk.endpoint.aors }}</code></p>
+                  </div>
+                  
+                  <div class="col-sm-8">
+                    <p><strong>Identify</strong></p>
+                    <p>Match: <code>{{ trunk.identify.match }}</code></p>
+                    <p><strong>AOR</strong></p>
+                    <p>Contact: <code>{{ trunk.aor.contact_address }}</code></p>
+                  </div>
+                </div>
+                
+              </span>
+        </div>
+      </span>
+
+    </div>
+    <!-- end panel -->
+
+  </div>
+</div>
