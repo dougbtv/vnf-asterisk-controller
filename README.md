@@ -10,6 +10,61 @@ A controller for vnf-asterisk.
 
 All the API endpoints are documented with an [API blueprint on Apiary.io](http://docs.vnfasteriskcontroller.apiary.io)
 
+## Quickstart
+
+The machine you intend to run it on should have git, docker, docker-compose, npm, and the grunt-cli installed globally.
+
+```
+git clone https://github.com/dougbtv/vnf-asterisk-controller.git
+cd vnf-asterisk-controller
+sudo npm install -g grunt-cli
+docker-compose build
+docker-compose pull
+docker-compose up
+docker exec -it controller npm install
+docker exec -it controller nodemon vnf-asterisk-controller.js
+```
+
+Then point your browser @ `http://localhost:80` to view the UI
+
+But wait, you'd like to connect these two instances and make a call, right? Let's do that.
+
+Go ahead and use the `/discover` endpoint, you can use it by issuing:
+
+```
+curl localhost:8001/discover && echo
+```
+
+That will output a list of two objects (each one representing an Asterisk instance), each object in the list containing a UUID. We can string these together to connect the two asterisk instances with trunks from each one to the other.
+
+Pick out the UUIDs and string them together on the `/connect` endpoint (and followed by a context call 'inbound' which is built into the dialplan on these instances) like so:
+
+```
+curl localhost:8001/connect/446a6e29-acf2-4a4a-ad75-faaacf50b3df/6f662dbd-cde2-4ac6-b79e-6fe74fad125e/inbound && echo
+```
+
+At this point you can refresh the "Discovery" tab on the web UI to see the trunks created.
+
+Now, let's originate a call from Asterisk1 instance to the Asterisk2 instance, we'll do this using `docker exec`, you can originate the call with:
+
+```
+docker exec -it asterisk1 asterisk -rx 'channel originate PJSIP/333@asterisk2 application playback tt-monkeys'
+```
+
+And we can verify that there's a call that has happened by looking at some results on Asterisk2. The gist is that there's both CSV CDRs, and also a recording of the call, we can see the CDR with:
+
+```
+docker exec -it asterisk2 tail -n1 /var/log/asterisk/cdr-csv/Master.csv
+```
+
+And we can see the call recording exists with:
+
+```
+docker exec -it asterisk2 ls -l /var/spool/asterisk/monitor
+```
+
+And there you go, two Asterisk instances service discovered and trunk configurations pushed to them, and a call made between the two.
+
 ## Building & Running it (for development)
 
 This git repo includes a `docker-compose.yml` file, which requires docker-compose v1.9.0 or later, and docker 1.12.0+. 
