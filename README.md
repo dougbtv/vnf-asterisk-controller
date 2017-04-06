@@ -1,6 +1,6 @@
 # vnf-asterisk-controller
 
-[![Build Status](https://travis-ci.org/dougbtv/vnf-asterisk-controller.svg?branch=master)](https://travis-ci.org/dougbtv/vnf-asterisk-controller)![nfvpe-bdage](https://img.shields.io/badge/nfvpe-approved-green.svg)![apache-badge](https://img.shields.io/badge/license-Apache%20v2-blue.svg)
+[![Build Status](https://travis-ci.org/dougbtv/vnf-asterisk-controller.svg?branch=master)](https://travis-ci.org/dougbtv/vnf-asterisk-controller) ![nfvpe-bdage](https://img.shields.io/badge/nfvpe-approved-green.svg) ![apache-badge](https://img.shields.io/badge/license-Apache%20v2-blue.svg)
 
 ![vac_logo][vac_logo]
 
