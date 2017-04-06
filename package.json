@@ -28,6 +28,7 @@
     "request": "*",
     "request-json": "^0.5.3",
     "restify": "*",
+    "ari-client": "*",
     "uuid": "*"
   },
   "devDependencies": {

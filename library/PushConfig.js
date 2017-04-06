@@ -126,7 +126,7 @@ module.exports = function(vac, opts, log) {
 
             if (!boxinfo.exists) {
 
-              var server_url = "http://asterisk:asterisk@" + asteriskip + ":" + opts.sourcery_port;
+              var server_url = "http://" + opts.ari_user + ":" + opts.ari_pass + "@" + asteriskip + ":" + opts.sourcery_port;
               // log.it("pushconfig_server_url",{server_url: server_url});
 
               var client = restify.createStringClient({
@@ -137,8 +137,8 @@ module.exports = function(vac, opts, log) {
               });
 
               var auth = {
-                user: 'asterisk',
-                pass: 'asterisk',
+                user: opts.ari_user,
+                pass: opts.ari_pass,
                 sendImmediately: 'false',
               };
 

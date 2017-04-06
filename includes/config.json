@@ -5,5 +5,7 @@
   "sourcery_port": "8088",
   "temp_path": "/tmp",
   "log_stdout": false,
+  "ari_user": "asterisk",
+  "ari_pass": "asterisk",
   "pretty_log": true
 }

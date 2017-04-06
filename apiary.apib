@@ -28,7 +28,7 @@ The discover endpoint allows you to list the Asterisk instances that have report
 
 This allows you to push a SIP trunk configuration to two Asterisk instances, creating complimentary trunks for each one. 
 
-If you were connecting, instances called `toyko` and `new_york` -- On the `tokyo` instance, there would be a trunk to `new_york`, and... On the instance for `new_york` there would be an instance to `tokyo`.
+If you were connecting, instances called `tokyo` and `new_york` -- On the `tokyo` instance, there would be a trunk to `new_york`, and... On the instance for `new_york` there would be an instance to `tokyo`.
 
 ### Connect two instances by creating SIP endpoints for each configuration to an Asterisk instance [GET]
 
@@ -118,6 +118,26 @@ Parameters here are:
 
 * `instance_uuid`: As found with `/discover` endpoint
 * `trunk_name`: the trunkname, as used previously with push, and listed in the `/discover` endpoint.
+
++ Response 200 (application/json)
+
+    + Body
+
+            {"name":"alice","boxid":"86faa28d-4cf4-4b3b-ae8b-08a20c4c2426","box_address":"172.19.0.3","endpoint":{"context":"inbound","aors":"alice","transport":"transport-udp","allow":"ulaw","disallow":"all"},"identify":{"match":"172.19.0.5/32"},"aor":{"contact_address":"sip:anyuser@172.19.0.5:5060"}}
+
+## Originate a call [/originate/{boxid_from}/{trunk_to}/application/{app}/{data}]
+
+You can originate a call from 
+
+### Originate a call from one box to another [GET]
+
+Parameters here are:
+
+* `boxid_from`: The box to originate the call from (uuid or nickname)
+* `trunk_to`: The trunk to originate the call on
+* `/application/`: Static value (may later be another option here)
+* `app`: The asterisk application to execute
+* `data`: The data for that asterisk application
 
 + Response 200 (application/json)
 
