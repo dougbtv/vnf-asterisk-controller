@@ -178,5 +178,44 @@ Sample of how parent / children relate, especially the modules to the singleton 
 ```
 
 
+## Dispatcher.
+
+```
+            Asterisk stasis client creation happens
+            dynamically, given discovered instances
+            which are handled by a dispatcher, which
+            creates "asteriskInstance" objects
+            which handle the stasis apps for each
+            instance.
+
+
+ +--------------------+
+ |asteriskDiscovered()|
+ +------+-------------+
+        |                +-----------------+
+        |                |                 |
+        +---------------->   dispatcher    |
+                         |   (singleton)   |
+                         |                 |
+                         +--------+--------+
+                                  |
+                         +--------v--------+
+                         | instanceExists? |
+                         +--------+--------+
+                                  |
+               +------------------v---------------------+
+               |                                        |
+               |      dispatcher.asterisk[uuid] =       |
+               |   new AsteriskInstance(192.168.1.100)  |
+               |                                        |
+               +----------------------------------------+
+
+
+From the main application, these instances can be controlled
+by calling, for example:
+
+vac.dispatcher.asterisk[uuid].originate("asterisk2","1234",param_n,function(){});
+
+```
 
 [vac_logo]: docs/vnf-asterisk-controller-logo.png

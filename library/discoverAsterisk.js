@@ -227,6 +227,11 @@ module.exports = function(vac, opts, log) {
 
           },function(err){
 
+            // Call up the dispatcher and tell him all about what we discovered.
+            async.each(allinfo,function(boxinfo,callback){
+              vac.dispatcher.createInstance(boxinfo.uuid);
+            });
+
             // All complete, should have all the known IP addresses.
             callback(false,allinfo);
 

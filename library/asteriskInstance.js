@@ -1,12 +1,41 @@
-module.exports = function(vac, opts, log) {
+module.exports = function(box_uuid, vac, opts, log) {
 
+  var client = require('ari-client');
   var async = require("async");
+
+  var initialized = false;
+
+  // Alrighty, so first thing first...
+  // We have to discover this box, and then connect to it.
+  vac.discoverasterisk.getBoxIP(box_uuid,function(err,asteriskip){
+
+      if (!err) {
+
+        var url = "http://" + asteriskip + ":" + opts.sourcery_port;
+
+        client.connect(url, opts.ari_user, opts.ari_pass, function (err, ari) {
+
+          if (!err) {
+
+            log.it("asteriskinstance_created",{uuid: box_uuid, ip_address: asteriskip});
+
+          } else {
+            // This is basically fatal, we discovered it, but couldn't client connect.
+            log.error("asteriskinstance_fatalerror_sorceryconnectfailed",{uuid: box_uuid, asteriskip: asteriskip});
+          }
+        });
+
+      } else {
+        // This is a fatal error, really.
+        log.error("asteriskinstance_fatalerror_discoveryfailed",{uuid: box_uuid});
+      }
+
+  });
 
   this.originateCall = function(boxid_from,trunk_to,asterisk_app,asterisk_app_data,callback) {
 
     // Why not on instantiation? Because...
     // This may be unique given the box.
-    var client = require('ari-client');
 
     vac.discoverasterisk.getBoxIP(boxid_from,function(err,asteriskip){
 

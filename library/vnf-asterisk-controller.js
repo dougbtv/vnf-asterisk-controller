@@ -10,7 +10,7 @@ module.exports = function(opts,log) {
   var discoverAsterisk = require("./discoverAsterisk.js"); 
   this.discoverasterisk = new discoverAsterisk(this,opts,log);
  
-  var asteriskActions = require("./asteriskActions.js"); 
-  this.asteriskactions = new asteriskActions(this,opts,log);
+  var Dispatcher = require("./dispatcher.js"); 
+  this.dispatcher = new Dispatcher(this,opts,log);
    
 }

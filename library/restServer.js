@@ -95,16 +95,14 @@ module.exports = function(vac, opts, log) {
 
   this.originateCall = function(req, res, next) {
 
-    vac.asteriskactions.originateCall(req.params.boxid_from,req.params.trunk_to,req.params.app,req.params.data,function(err,returns_info){
-
-      if (!err) {
-        // Return a JSON result.
-        res.contentType = 'json';
-        res.send(returns_info);
-      } else {
-        res.send(500, err);
-      }
-
+    vac.dispatcher.originateCall(req.params.boxid_from,req.params.trunk_to,req.params.app,req.params.data,function(err,returns_info){
+        if (!err) {
+          // Return a JSON result.
+          res.contentType = 'json';
+          res.send(result);
+        } else {
+          res.send(500, err);
+        }
     });
 
   }
