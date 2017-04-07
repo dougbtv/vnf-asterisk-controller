@@ -10,16 +10,24 @@ module.exports = function(box_uuid, vac, opts, log) {
   // What's this box do on an inbound call?
   // enumerated type:
   // next_host
-  this.inbound_behavior = {
-    role: 'next_host',
-    destination: 'SOME_UUID',
-  };
-  var inbound_behavior = this.inbound_behavior;
+  var BEHAVIOR_PLAYBACK = 'playback';
+  var BEHAVIOR_NEXTHOST = 'next_host'
 
   // this.inbound_behavior = {
-  //   role: 'playback',
-  //   destination: 'tt-monkeys',
+  //   role: BEHAVIOR_NEXTHOST,
+  //   destination: 'SOME_UUID',
   // };
+
+  // By default -- just playback an RCAN when you pick up.
+  // Of course -- default to the best of all RCANs...
+  // screaming monkeys \m/
+  this.inbound_behavior = {
+    role: BEHAVIOR_PLAYBACK,
+    destination: 'sound:tt-monkeys',
+  };
+
+  var inbound_behavior = this.inbound_behavior;
+
 
 
   // ---------------------------
@@ -80,7 +88,39 @@ module.exports = function(box_uuid, vac, opts, log) {
   // ----------------------------------- Stasis Inbound
   function stasisStartInbound(event, channel) {
 
-    var media = 'sound:tt-monkeys';
+
+    switch(inbound_behavior.role) {
+      case BEHAVIOR_PLAYBACK:
+        behavior_playback(inbound_behavior.destination,event,channel);
+        break;
+
+      case BEHAVIOR_NEXTHOST:
+        log.warn("asteriskinstance_behavior_NEXTHOST_undefined");
+
+      default:
+        log.warn("asteriskinstance_behavior_undefined", {inbound_behavior: inbound_behavior, box_uuid: box_uuid});
+        channel.hangup(function(err) {
+          if (err) {
+            log.warn("error_asteriskinstance_channelhangup",{note: "looks like an early hangup", err: err});
+          }
+        });
+        break;
+
+    }
+
+  }
+
+  // handler for StasisEnd event
+  function stasisEndInbound(event, channel) {
+
+    log.it("asteriskinstance_channel_leave",{uuid: box_uuid, channel: channel.name});
+
+  }
+
+  // ---------------------- inbound behaviors
+
+  var behavior_playback = function (media,event,channel) {
+    
     log.it("asteriskinstance_playbackstarted",{uuid: box_uuid, channel: channel.name, media: media});
 
     var playback = ari.Playback();
@@ -105,14 +145,10 @@ module.exports = function(box_uuid, vac, opts, log) {
 
   }
 
-  // handler for StasisEnd event
-  function stasisEndInbound(event, channel) {
-
-    log.it("asteriskinstance_channel_leave",{uuid: box_uuid, channel: channel.name});
-
-  }
 
   // ----------------------------------- end Stasis Inbound
+
+
 
 
   this.originateCall = function(boxid_from,trunk_to,asterisk_app,asterisk_app_data,callback) {
