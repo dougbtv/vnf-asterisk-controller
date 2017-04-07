@@ -3,11 +3,26 @@ module.exports = function(box_uuid, vac, opts, log) {
   // Our dependencies.
   var client = require('ari-client');
   var async = require("async");
-  var util = require('util');
 
+  // ---------------------------
   // Our public properties.
 
+  // What's this box do on an inbound call?
+  // enumerated type:
+  // next_host
+  this.inbound_behavior = {
+    role: 'next_host',
+    destination: 'SOME_UUID',
+  };
+  var inbound_behavior = this.inbound_behavior;
 
+  // this.inbound_behavior = {
+  //   role: 'playback',
+  //   destination: 'tt-monkeys',
+  // };
+
+
+  // ---------------------------
   // Our private properties.
   var initialized = false;
   var ari = null;
@@ -65,23 +80,20 @@ module.exports = function(box_uuid, vac, opts, log) {
   // ----------------------------------- Stasis Inbound
   function stasisStartInbound(event, channel) {
 
-    console.log(util.format(
-          'Monkeys! Attack %s!', channel.name));
+    var media = 'sound:tt-monkeys';
+    log.it("asteriskinstance_playbackstarted",{uuid: box_uuid, channel: channel.name, media: media});
 
     var playback = ari.Playback();
 
-    channel.play({media: 'sound:tt-monkeys'}, playback, function(err, newPlayback) {
+    channel.play({media: media}, playback, function(err, newPlayback) {
       if (err) {
         log.error("error_asteriskinstance_playbackfail",{err: err});
-        throw err;
       }
     });
 
     playback.on('PlaybackFinished', function(event, completedPlayback) {
       
-      console.log(util.format(
-          'Monkeys successfully vanquished %s; hanging them up',
-          channel.name));
+      log.it("asteriskinstance_playbackfinished",{uuid: box_uuid, channel: channel.name});
 
       channel.hangup(function(err) {
         if (err) {
@@ -91,14 +103,13 @@ module.exports = function(box_uuid, vac, opts, log) {
 
     });
 
-    
   }
 
   // handler for StasisEnd event
   function stasisEndInbound(event, channel) {
 
-    console.log(util.format(
-          'Channel %s just left our application', channel.name));
+    log.it("asteriskinstance_channel_leave",{uuid: box_uuid, channel: channel.name});
+
   }
 
   // ----------------------------------- end Stasis Inbound
