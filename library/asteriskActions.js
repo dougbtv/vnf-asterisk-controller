@@ -14,6 +14,33 @@ module.exports = function(vac, opts, log) {
 
         var url = "http://" + asteriskip + ":" + opts.sourcery_port;
 
+        /*
+        async.waterfall([
+          function(callback) {
+
+            client.connect(url, opts.ari_user, opts.ari_pass, function (err, ari) {
+              if (err) {
+                log.error("error_asteriskactions_clientconect",{err: err});
+              }
+              callback(err,ari);
+            });
+
+          },
+          function(ari,callback) {
+
+          }
+        ],function(err, result){
+
+          if (!err) {
+            log.it("asteriskactions_waterfallcomplete",{stuff: "!trace"});
+            callback(err,"completed");
+          } else {
+
+          }
+
+        });
+        */
+
         client.connect(url, opts.ari_user, opts.ari_pass, function (err, ari) {
 
           if (!err) {
