@@ -42,12 +42,12 @@
               <!-- - - - - - - - - - - - - - - - - TANDEM DESTINATION -->
               <span ng-switch-when="tandem">
 
-                  <span ng-if="instance.trunks.length">
+                  <span ng-if="instance.discovery.trunks.length">
                     <select ng-model="instance.destination">
-                      <option ng-repeat="option in data.availableOptions" value="{{option.id}}">{{option.name}}</option>
+                      <option ng-repeat="option in instance.discovery.trunks" value="{{option}}">{{option}}</option>
                     </select>
                   </span>
-                  <span ng-if="!instance.trunks.length">
+                  <span ng-if="!instance.discovery.trunks.length">
                     (No trunks available to tandem call.)
                   </span>
 
