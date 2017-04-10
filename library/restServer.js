@@ -79,6 +79,7 @@ module.exports = function(vac, opts, log) {
       { route: '/gettrunk/:boxid/:trunkname',                             method: this.getTrunk },
       { route: '/originate/:boxid_from/:trunk_to/application/:app/:data', method: this.originateCall },
       { route: '/discover',                                               method: this.discoverAll },
+      { route: '/get_routing',                                            method: this.getRouting },
       { route: '/version',                                                method: this.version },
       { route: '/list/:query',                                            method: this.list },
     ];
@@ -93,13 +94,27 @@ module.exports = function(vac, opts, log) {
 
   };
 
+  this.getRouting = function(req, res, next) {
+
+    vac.dispatcher.getRouting(function(err,returns_info){
+        if (!err) {
+          // Return a JSON result.
+          res.contentType = 'json';
+          res.send(returns_info);
+        } else {
+          res.send(500, err);
+        }
+    });
+
+  }
+
   this.originateCall = function(req, res, next) {
 
     vac.dispatcher.originateCall(req.params.boxid_from,req.params.trunk_to,req.params.app,req.params.data,function(err,returns_info){
         if (!err) {
           // Return a JSON result.
           res.contentType = 'json';
-          res.send(result);
+          res.send(returns_info);
         } else {
           res.send(500, err);
         }

@@ -44,6 +44,7 @@ if (startserver) {
 
 // Used among tests.
 
+var all_discovery;
 var uuid_a;
 var uuid_b;
 var ipaddr_secondinstance;
@@ -260,6 +261,71 @@ module.exports = {
       test.done();
       
     });
+  },
+  getRouting: function(test){
+  
+    client.get('/get_routing', function(err, req, res, data) {
+
+      if (err) {
+        test.ok(false, "Restify error: " + err);
+      }
+    
+      test.ok(res.statusCode == 200, "gettrunk returns 200 OK");
+      test.ok(data.length === 2,"Two items in list");
+      test.ok(data[0].role === null,"First instance role is null");
+      test.ok(data[1].role === null,"Second instance role is null");
+      test.done();
+    });
+  },
+  discoverBeforeDelete: function(test){
+  
+    client.get('/discover', function(err, req, res, data) {
+
+      if (err) {
+        test.ok(false, "Restify error: " + err);
+      }
+    
+      test.ok(res.statusCode == 200, "discover returns 200 OK");
+      all_discovery = data;
+
+      test.done();
+
+    });
+  },
+  deleteAllTrunks: function(test){
+
+    var trunks_deleted = 0;
+
+    async.eachSeries(all_discovery,function(each_discovery,callback){
+
+      async.eachSeries(each_discovery.trunks,function(each_trunk,callback){
+
+        client.get('/deleteconfig/' + each_discovery.uuid + '/' + each_trunk, function(err, req, res, data) {
+
+          if (err) {
+            test.ok(false, "Restify error: " + err);
+          }
+        
+          test.ok(res.statusCode == 200, "Trunk deleted");
+          
+          // For each trunk.
+          trunks_deleted++;
+          callback(false);
+        });
+
+      },function(err,result){
+        // For each instance.
+        callback(false);
+      });
+
+
+    },function(err,result){
+
+      test.ok(trunks_deleted == 2,"Two trunks deleted.");
+      test.done();
+
+    });
+
   },
   serverKill: function(test) {
     if (startserver) {

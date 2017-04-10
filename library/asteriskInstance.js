@@ -7,6 +7,25 @@ module.exports = function(box_uuid, vac, opts, log) {
   // ---------------------------
   // Our public properties.
 
+  // Keep the uuid around for convenience.
+  this.uuid = box_uuid;
+
+  // We're also going to have the discovery information here about the instance.
+  // Let's compile that.
+  this.discovery = null;
+
+  vac.discoverasterisk.discoverOne(box_uuid,function(err,discovery_result){
+    if (!err) {
+
+      // Ok, just keep it around.
+      this.discovery = discovery_result;
+
+    } else {
+      log.warn("warning_asteriskinstance_discoveryfailed",{uuid: box_uuid});
+    }
+
+  }.bind(this));
+
   // What's this box do on an inbound call?
   // enumerated type:
   // next_host
@@ -21,9 +40,13 @@ module.exports = function(box_uuid, vac, opts, log) {
   // By default -- just playback an RCAN when you pick up.
   // Of course -- default to the best of all RCANs...
   // screaming monkeys \m/
+  // this.inbound_behavior = {
+  //   role: BEHAVIOR_PLAYBACK,
+  //   destination: 'sound:tt-monkeys',
+  // };
   this.inbound_behavior = {
-    role: BEHAVIOR_PLAYBACK,
-    destination: 'sound:tt-monkeys',
+    role: null,
+    destination: null,
   };
 
   var inbound_behavior = this.inbound_behavior;
@@ -89,14 +112,23 @@ module.exports = function(box_uuid, vac, opts, log) {
   function stasisStartInbound(event, channel) {
 
 
+    // On an inbound call -- switch the behavior depending on how it's defined here.
+    // We're going to start with two behaviors, and a default.
+    // 
+    // Playback: Playback a sound file.
+    // Next host: Bridge the call two the next host (tandem the call)
+    // Default: Hangup the call.
     switch(inbound_behavior.role) {
+      // Playback a sound file.
       case BEHAVIOR_PLAYBACK:
         behavior_playback(inbound_behavior.destination,event,channel);
         break;
 
+      // Route the call to the next host.
       case BEHAVIOR_NEXTHOST:
         log.warn("asteriskinstance_behavior_NEXTHOST_undefined");
 
+      // By default... hangup the call and note that it happened in the logs.
       default:
         log.warn("asteriskinstance_behavior_undefined", {inbound_behavior: inbound_behavior, box_uuid: box_uuid});
         channel.hangup(function(err) {

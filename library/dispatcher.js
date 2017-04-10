@@ -4,12 +4,57 @@ module.exports = function(vac, opts, log) {
   // We create multiple instances of this, as we discover machines.
   var AsteriskInstance = require("./asteriskInstance.js"); 
 
-
   // Our asterisk instances.
   this.asterisk = {};
   var asterisk = this.asterisk;
 
+  // ---------------------------------------------------
+  // Pick up routing information
+  // that is, cycle through the known instance
+  // and ship back the meta data.
+  this.getRouting = function(callback) {
+
+    // Default what we learned about each.
+    var routing = [];
+
+    log.it("trace_dispatcher_asteriskinstances",asterisk);
+
+    asterisk_keys = Object.keys(asterisk);
+    // Object.keys(target).forEach(function (key) { target[key]; });
+
+    if (asterisk_keys.length) {
+  
+      // Cycle through the known instances.
+      asterisk_keys.forEach(function (key) {
+        
+        var ast = asterisk[key];
+
+        // Keeping each instance.
+        routing.push({
+          uuid: ast.uuid,
+          role: ast.inbound_behavior.role,
+          destination: ast.inbound_behavior.destination,
+          discovery: ast.discovery,
+        });
+      });
+
+      // Ship it back.
+      callback(false,routing);
+
+    } else {
+   
+      // warn there there's nothing here to report on.
+      log.warn("dispatcher_getrouting_noinstances",{note: "There's no instances to return."});
+      callback("dispatcher_getrouting_noinstances",[]);
+
+    }
+
+
+  }
+
+  // ----------------------------------
   // Create a new box.
+
   this.createInstance = function(uuid,callback) {
 
     // Alright, so do we know about this?

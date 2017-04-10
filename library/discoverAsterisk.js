@@ -164,6 +164,55 @@ module.exports = function(vac, opts, log) {
 
   var getTrunkNames = this.getTrunkNames;
 
+  // Discover a single asterisk instance.
+  // It's a hack. !TODO: This is inefficient but required little code change
+  this.discoverOne = function(target_uuid,callback) {
+
+    // Inefficient, but, get all the things.
+    var all = discoverAll(function(err,allinfo){
+
+      if (!err) {
+
+        if (allinfo.length) {
+
+          // Ok now, given all the info...
+          // Cycle through and find our target.
+
+          var returns = null;
+
+          allinfo.forEach(function(each_discovered){
+
+            if (target_uuid == each_discovered.uuid) {
+              returns = each_discovered;
+            }
+
+          });
+
+          if (returns) {
+
+            // Great, we're all set now.
+            callback(false,returns);
+
+          } else {
+            log.warn("discoverasterisk_discoverone_nomatch",{note: "There's no match in the list",target_uuid: target_uuid});
+            callback("discoverasterisk_discoverone_nomatch");
+          }
+
+        } else {
+          log.warn("discoverasterisk_discoverone_empty",{note: "There's nothing in the list",target_uuid: target_uuid});
+          callback("discoverasterisk_discoverone_empty");
+        }
+
+      } else {
+        callback(err);
+      }
+
+    });
+
+  }
+
+  var discoverOne = this.discoverOne;
+
   
   // Discover all asterisk boxes that have reported in.
   this.discoverAll = function(callback) {
