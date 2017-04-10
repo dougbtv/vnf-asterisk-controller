@@ -8,6 +8,54 @@ module.exports = function(vac, opts, log) {
   this.asterisk = {};
   var asterisk = this.asterisk;
 
+  this.setRouting = function(box_id,behavior,destination,callback) {
+
+    log.it("!trace____________________________boxid",{box_id: box_id,behavior: behavior, destination: destination});
+
+    // Alright, first thing, let's make sure the instance exists.
+    if (!(typeof asterisk[box_id] === 'undefined')) {
+
+      // Check and see if the behavior is valid.
+      if (asterisk[box_id].BEHAVIOR_LIST.indexOf(behavior) !== -1) {
+
+        // Ok, the box exists, that's good.
+        // For now, all I care about checking is that for a tandem the trunk exists.
+        var tandem_error = false;
+        if (behavior == "tandem") {
+          // make sure the trunk is there in the list of trunks.
+          if (asterisk[box_id].discovery.trunks.indexOf(destination) == -1) {
+            tandem_error = true;
+          }
+        }
+
+        if (!tandem_error) {
+
+          // Ok, we should be good to go with our error checking.
+          // Now we can go and set these basically.... literally in the properties.
+          asterisk[box_id].inbound_behavior.role = behavior;
+          asterisk[box_id].inbound_behavior.destination = destination;
+          callback(false);
+
+        } else {
+          // That trunk doesn't exit for a tandem.
+          log.warn("warning_dispatcher_setrouting_notrunk",{box_id: box_id,destination: destination});
+          callback("warning_dispatcher_setrouting_notrunk");
+        }
+
+      } else {
+        // That behavior doesn't exist.
+        log.warn("warning_dispatcher_setrouting_badbehavior",{box_id: box_id, behavior: behavior});
+        callback("warning_dispatcher_setrouting_badbehavior");
+      }
+
+    } else {
+      // Box doesn't exist, that's an error.
+      log.warn("warning_dispatcher_setrouting_boxid_noexist",{box_id: box_id});
+      callback("warning_dispatcher_setrouting_boxid_noexist");
+    }
+
+  }
+
   // ---------------------------------------------------
   // Pick up routing information
   // that is, cycle through the known instance

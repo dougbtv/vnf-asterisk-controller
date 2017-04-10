@@ -80,6 +80,8 @@ module.exports = function(vac, opts, log) {
       { route: '/originate/:boxid_from/:trunk_to/application/:app/:data', method: this.originateCall },
       { route: '/discover',                                               method: this.discoverAll },
       { route: '/get_routing',                                            method: this.getRouting },
+      { route: '/set_routing/:box_id/:behavior/:destination',             method: this.setRouting },
+      { route: '/set_routing/:box_id/:behavior',                          method: this.setRouting },
       { route: '/version',                                                method: this.version },
       { route: '/list/:query',                                            method: this.list },
     ];
@@ -93,6 +95,25 @@ module.exports = function(vac, opts, log) {
     }.bind(this));
 
   };
+
+  this.setRouting = function(req, res, next) {
+
+    if (typeof req.params.destination == 'undefined') {
+      // That's fine, let's just call it an empty string.
+      req.params.destination = "";
+    }
+
+    vac.dispatcher.setRouting(req.params.box_id,req.params.behavior,req.params.destination,function(err){
+        if (!err) {
+          // Return a JSON result.
+          res.contentType = 'json';
+          res.send({success: true});
+        } else {
+          res.send(500, err);
+        }
+    });
+
+  }
 
   this.getRouting = function(req, res, next) {
 

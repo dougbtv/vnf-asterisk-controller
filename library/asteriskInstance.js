@@ -28,12 +28,13 @@ module.exports = function(box_uuid, vac, opts, log) {
 
   // What's this box do on an inbound call?
   // enumerated type:
-  // next_host
+  // tandem
   var BEHAVIOR_PLAYBACK = 'playback';
-  var BEHAVIOR_NEXTHOST = 'next_host'
+  var BEHAVIOR_TANDEM = 'tandem';
+  this.BEHAVIOR_LIST = [BEHAVIOR_PLAYBACK,BEHAVIOR_TANDEM];
 
   // this.inbound_behavior = {
-  //   role: BEHAVIOR_NEXTHOST,
+  //   role: BEHAVIOR_TANDEM,
   //   destination: 'SOME_UUID',
   // };
 
@@ -125,8 +126,8 @@ module.exports = function(box_uuid, vac, opts, log) {
         break;
 
       // Route the call to the next host.
-      case BEHAVIOR_NEXTHOST:
-        log.warn("asteriskinstance_behavior_NEXTHOST_undefined");
+      case BEHAVIOR_TANDEM:
+        log.warn("asteriskinstance_behavior_TANDEM_undefined");
 
       // By default... hangup the call and note that it happened in the logs.
       default:
