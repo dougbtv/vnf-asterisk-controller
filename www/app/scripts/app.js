@@ -37,6 +37,11 @@ var vacApp = angular
         controller: 'discoveryController',
         controllerAs: 'discovery'
       })
+      .when('/roles', {
+        templateUrl: 'views/roles.html',
+        controller: 'rolesController',
+        controllerAs: 'roles'
+      })
       .otherwise({
         redirectTo: '/'
       });

@@ -1,0 +1,86 @@
+
+
+<div class="col-sm-12">
+  <div class="row">
+    <h3>Instance Roles</h3>
+    <hr />
+  </div>
+
+  <div class="row panel panel-primary" ng-repeat="instance in instances">
+
+    <!-- panel -->
+    <div class="panel-heading">
+      <h3 class="panel-title">{{ instance.discovery.nickname ? instance.discovery.nickname : instance.uuid }}</h3>
+    </div>
+    <div class="panel-body">
+
+      <div class="container">
+        
+        <!-- - - - - - - - - - - - - - - - - ROLES -->
+        <div class="row">
+          <div class="col-sm-2">
+            Role: 
+          </div>
+          <div class="col-sm-10">
+            <select ng-model="instance.role">
+              <option value="">(No role defined)</option>
+              <option value="tandem">Tandem</option>
+              <option value="playback">Playback</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- - - - - - - - - - - - - - - - - DESTINATION -->
+        <div class="row">
+          <div class="col-sm-2">
+            Destination: 
+          </div>
+
+          <div class="col-sm-10">
+            <span ng-switch="instance.role">
+
+              <!-- - - - - - - - - - - - - - - - - TANDEM DESTINATION -->
+              <span ng-switch-when="tandem">
+
+                  <span ng-if="instance.trunks.length">
+                    <select ng-model="instance.destination">
+                      <option ng-repeat="option in data.availableOptions" value="{{option.id}}">{{option.name}}</option>
+                    </select>
+                  </span>
+                  <span ng-if="!instance.trunks.length">
+                    (No trunks available to tandem call.)
+                  </span>
+
+              </span>
+              
+              <!-- - - - - - - - - - - - - - - - - Playback -->
+              <span ng-switch-when="playback">
+
+                  <input type="text" ng-model="instance.destination" />
+
+              </span>
+              
+              <span ng-switch-default>
+                <!-- nothing here when default... -->
+                <i>(Unavailable)</i>
+              </span>
+            </span>
+          </div>
+
+        </div>
+
+        <!-- - - - - - - - - - - - - - - - - BUTTON -->
+        <div class="row">
+          <div class="col-sm-2">
+            [button]
+          </div>
+        </div>
+
+      </div>
+      
+
+    </div>
+    <!-- end panel -->
+
+  </div>
+</div>
