@@ -166,9 +166,17 @@ module.exports = {
       if (err) {
         test.ok(false, "Restify error: " + err);
       }
+
+      // Sort this by nickname, so we know what we're connecting
+      // (e.g. asterisk1 to asterisk2)
+      data.sort(function(a, b){
+        if(a.nickname < b.nickname) return -1;
+        if(a.nickname > b.nickname) return 1;
+        return 0; 
+      })
     
       test.ok(res.statusCode == 200, "discover returns 200 OK");
-      test.ok(data.length == 2,"two asterisk instances discovered");
+      test.ok(data.length == 3,"three asterisk instances discovered");
       test.ok(typeof data[0].uuid == 'string', "discover first element uuid is a string (" + data[0].uuid + ")");
       test.ok(data[1].ip.match(/^\d+\.\d+\.\d+\.\d+$/),"second element's IP address looks like an IP (" + data[1].ip + ")");
       uuid_a = data[0].uuid;
@@ -271,7 +279,7 @@ module.exports = {
       }
     
       test.ok(res.statusCode == 200, "gettrunk returns 200 OK");
-      test.ok(data.length === 2,"Two items in list");
+      test.ok(data.length === 3,"Two items in list");
       test.ok(data[0].role === null,"First instance role is null");
       test.ok(data[1].role === null,"Second instance role is null");
       test.done();
