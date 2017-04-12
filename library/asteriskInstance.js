@@ -195,7 +195,7 @@ module.exports = function(box_uuid, vac, opts, log) {
     });
 
     dialed.originate(
-      {endpoint: endpoint, app: 'bridge-dial', appArgs: 'dialed'},
+      {endpoint: endpoint, app: 'inbound', appArgs: 'dialed'},
       function(err, dialed) {
         if (err) {
           log.error("error_asteriskinstance_originatetandem_originate",{err: err});
