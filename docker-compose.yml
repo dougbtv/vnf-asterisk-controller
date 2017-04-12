@@ -63,7 +63,6 @@ services:
       - ./docker/pjsip.conf:/etc/asterisk/pjsip.conf
       - ./docker/modules.conf:/etc/asterisk/modules.conf
       - ./docker/empty.conf:/etc/asterisk/res_parking.conf
-      - ./docker/empty.conf:/etc/asterisk/extensions.ael
       - ./docker/sounds:/var/lib/asterisk/sounds/en/
     entrypoint: "/entrypoint.sh"
     depends_on:
@@ -90,7 +89,6 @@ services:
       - ./docker/pjsip.conf:/etc/asterisk/pjsip.conf
       - ./docker/modules.conf:/etc/asterisk/modules.conf
       - ./docker/empty.conf:/etc/asterisk/res_parking.conf
-      - ./docker/empty.conf:/etc/asterisk/extensions.ael
       - ./docker/sounds:/var/lib/asterisk/sounds/en/
     entrypoint: "/entrypoint.sh"
     depends_on:
@@ -117,7 +115,6 @@ services:
       - ./docker/pjsip.conf:/etc/asterisk/pjsip.conf
       - ./docker/modules.conf:/etc/asterisk/modules.conf
       - ./docker/empty.conf:/etc/asterisk/res_parking.conf
-      - ./docker/empty.conf:/etc/asterisk/extensions.ael
       - ./docker/sounds:/var/lib/asterisk/sounds/en/
     entrypoint: "/entrypoint.sh"
     depends_on:
