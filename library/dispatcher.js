@@ -1,5 +1,7 @@
 module.exports = function(vac, opts, log) {
 
+  var async = require('async');
+
   // Let's include the local library we need which is asterisk instance.
   // We create multiple instances of this, as we discover machines.
   var AsteriskInstance = require("./asteriskInstance.js"); 
@@ -73,21 +75,37 @@ module.exports = function(vac, opts, log) {
     if (asterisk_keys.length) {
   
       // Cycle through the known instances.
-      asterisk_keys.forEach(function (key) {
-        
+      async.eachSeries(asterisk_keys,function(key,callback){
+
         var ast = asterisk[key];
 
-        // Keeping each instance.
-        routing.push({
-          uuid: ast.uuid,
-          role: ast.inbound_behavior.role,
-          destination: ast.inbound_behavior.destination,
-          discovery: ast.discovery,
+        // Figure out the discovery info for each machine.
+        vac.discoverasterisk.discoverOne(key,function(err,discovery_result){
+
+          if (!err) {
+    
+            // Keeping each instance.
+            routing.push({
+              
+              uuid: ast.uuid,
+              role: ast.inbound_behavior.role,
+              destination: ast.inbound_behavior.destination,
+              discovery: discovery_result,
+
+            });
+
+          }
+
+          callback(err);
         });
+
+      },function(err){
+  
+        // Ship it back.
+        callback(err,routing);
+
       });
 
-      // Ship it back.
-      callback(false,routing);
 
     } else {
    

@@ -53,6 +53,7 @@ services:
   # --------------------------------------------- Asterisk
   asterisk1:
     container_name: asterisk1
+    hostname: asterisk1
     image: "dougbtv/asterisk14"
     volumes:
       - ./docker/asterisk_entrypoint.sh:/entrypoint.sh
@@ -79,6 +80,7 @@ services:
       ETCD_HOSTNAME: "etcd"
   asterisk2:
     container_name: asterisk2
+    hostname: asterisk2
     image: "dougbtv/asterisk14"
     volumes:
       - ./docker/asterisk_entrypoint.sh:/entrypoint.sh
@@ -105,6 +107,7 @@ services:
       ETCD_HOSTNAME: "etcd"
   asterisk3:
     container_name: asterisk3
+    hostname: asterisk3
     image: "dougbtv/asterisk14"
     volumes:
       - ./docker/asterisk_entrypoint.sh:/entrypoint.sh
