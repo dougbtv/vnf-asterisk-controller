@@ -31,7 +31,8 @@ module.exports = function(box_uuid, vac, opts, log) {
   // tandem
   var BEHAVIOR_PLAYBACK = 'playback';
   var BEHAVIOR_TANDEM = 'tandem';
-  this.BEHAVIOR_LIST = [BEHAVIOR_PLAYBACK,BEHAVIOR_TANDEM];
+  this.BEHAVIOR_DEFAULT = 'default';
+  this.BEHAVIOR_LIST = [BEHAVIOR_PLAYBACK,BEHAVIOR_TANDEM,"default"];
 
   // this.inbound_behavior = {
   //   role: BEHAVIOR_TANDEM,

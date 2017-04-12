@@ -12,7 +12,7 @@ module.exports = function(vac, opts, log) {
 
   this.setRouting = function(box_id,behavior,destination,callback) {
 
-    log.it("!trace____________________________boxid",{box_id: box_id,behavior: behavior, destination: destination});
+    // log.it("________________________setRouting____boxid",{box_id: box_id,behavior: behavior, destination: destination});
 
     // Alright, first thing, let's make sure the instance exists.
     if (!(typeof asterisk[box_id] === 'undefined')) {
@@ -32,10 +32,19 @@ module.exports = function(vac, opts, log) {
 
         if (!tandem_error) {
 
+          // Is this default? that's kind of special.
+          var noted_behavior = behavior;
+          if (behavior == asterisk[box_id].BEHAVIOR_DEFAULT) {
+            behavior = null;
+            destination = null;
+          }
+
           // Ok, we should be good to go with our error checking.
           // Now we can go and set these basically.... literally in the properties.
           asterisk[box_id].inbound_behavior.role = behavior;
           asterisk[box_id].inbound_behavior.destination = destination;
+
+          log.it("dispatcher_setrouting",{box_id: box_id, behavior: noted_behavior, destination: destination});
           callback(false);
 
         } else {

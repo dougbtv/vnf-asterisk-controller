@@ -132,7 +132,7 @@ module.exports = function(vac, opts, log) {
           // Ok, no get the keys outta there.
           var trunknames = [];
 
-          log.it("!trace",{etcdresult: etcdresult});
+          // log.it("!trace",{etcdresult: etcdresult});
 
           if (typeof etcdresult.node.nodes !== 'undefined') {
 
