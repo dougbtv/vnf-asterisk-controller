@@ -144,3 +144,45 @@ Parameters here are:
     + Body
 
             {"name":"alice","boxid":"86faa28d-4cf4-4b3b-ae8b-08a20c4c2426","box_address":"172.19.0.3","endpoint":{"context":"inbound","aors":"alice","transport":"transport-udp","allow":"ulaw","disallow":"all"},"identify":{"match":"172.19.0.5/32"},"aor":{"contact_address":"sip:anyuser@172.19.0.5:5060"}}
+
+## Get routing [/get_routing]
+
+Get the routing information about all instances.
+
+### List all routing instructions for each machine [GET]
+
+Takes no parameters, and lists all instances, for now.
+
++ Response 200 (application/json)
+
+    + Body
+
+            [{"uuid":"69a3d6c9-12cc-4f00-9ace-8a617fb9c7cd","role":null,"destination":null,"discovery":{"uuid":"69a3d6c9-12cc-4f00-9ace-8a617fb9c7cd","ip":"172.19.0.3","nickname":"asterisk1","trunks":[]}},{"uuid":"c832fb3e-a0f1-4660-923a-0c6841a2a60d","role":null,"destination":null,"discovery":{"uuid":"c832fb3e-a0f1-4660-923a-0c6841a2a60d","ip":"172.19.0.5","nickname":"asterisk2","trunks":[]}}]
+
+## Set routing behavior [/set_routing/{box_id}/{behavior}/{destination}]
+
+Set the routing behavior for a particular instances.
+
+### Define the routing behavior [GET]
+
+Set the routing behavior for a particular machine.
+
+Parameters available are:
+
+* `box_id`: The UUID for a particular Asterisk instance
+* `behavior`: Enumerated type, see below.
+* `destination`: Is a further parameter dependent on behavior, see below.
+
+`behavior` types are enumerated, and options are:
+
+* `tandem`: Tandem a machine, the `destination` is the trunk name
+* `playback`: Playback a soundfile, the `destination` is the sound file to play.
+* `default`: Clears previously set behaviors. `destination` is unused.
+
+Returns only a success or error.
+
++ Response 200 (application/json)
+
+    + Body
+
+            {"success":true}
