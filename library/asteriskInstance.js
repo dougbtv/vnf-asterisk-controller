@@ -70,14 +70,15 @@ module.exports = function(box_uuid, vac, opts, log) {
 
       if (!err) {
 
-        // Connect to ARI
+        // ------------------------------------------
+        // Connect to ARI - Inbound app
         var url = "http://" + asteriskip + ":" + opts.sourcery_port;
         client.connect(url, opts.ari_user, opts.ari_pass, function (err, initial_ari) {
 
           if (!err) {
 
             // Alright we have an instance created.
-            log.it("asteriskinstance_created",{uuid: box_uuid, ip_address: asteriskip});
+            log.it("asteriskinstance_created",{box_uuid: box_uuid, ip_address: asteriskip});
 
             // Save the returned ari
             ari = initial_ari;
@@ -89,16 +90,13 @@ module.exports = function(box_uuid, vac, opts, log) {
 
           } else {
             // This is basically fatal, we discovered it, but couldn't client connect.
-            log.error("asteriskinstance_fatalerror_sorceryconnectfailed",{uuid: box_uuid, asteriskip: asteriskip});
+            log.error("asteriskinstance_fatalerror_sorceryconnectfailed",{box_uuid: box_uuid, asteriskip: asteriskip});
           }
         });
 
-        // Wait... should I connect multiple times for multiple apps?
-
-
       } else {
         // This is a fatal error, really.
-        log.error("asteriskinstance_fatalerror_discoveryfailed",{uuid: box_uuid});
+        log.error("asteriskinstance_fatalerror_discoveryfailed",{box_uuid: box_uuid});
       }
 
   });
@@ -128,7 +126,6 @@ module.exports = function(box_uuid, vac, opts, log) {
 
       // Route the call to the next host.
       case BEHAVIOR_TANDEM:
-        log.warn("asteriskinstance_behavior_TANDEM_undefined");
         behavior_tandem('PJSIP/123@' + inbound_behavior.destination,event,channel);
         break;
 
@@ -137,7 +134,7 @@ module.exports = function(box_uuid, vac, opts, log) {
         log.warn("asteriskinstance_behavior_undefined", {inbound_behavior: inbound_behavior, box_uuid: box_uuid});
         channel.hangup(function(err) {
           if (err) {
-            log.warn("error_asteriskinstance_channelhangup",{note: "looks like an early hangup", err: err});
+            log.warn("error_asteriskinstance_channelhangup",{note: "looks like an early hangup", err: err, box_uuid: box_uuid});
           }
         });
         break;
@@ -159,49 +156,45 @@ module.exports = function(box_uuid, vac, opts, log) {
 
   // --------------------------------------------------
   // ---------------------- tandem
-  
-  var behavior_tandem = function (endpoint,event,channel) {
 
-    // TODO: May not keep this playback.
-    /*
-    var playback = ari.Playback();
-    channel.play(
-      {media: 'sound:pls-wait-connect-call'},
-      playback, 
-      function(err, playback) {
-        if (err) {
-          log.error("error_asteriskinstance_originateplaybackerror",{err: err});
-        }
-    });
-    */
+  function behavior_tandem(endpoint,event,channel) {
 
-    originate_tandem(endpoint,channel);
+    var is_called_party = event.args[0] === 'dialed';
 
-  }
+    if (!is_called_party) {
 
-  function originate_tandem(endpoint,channel) {
+      var dialed = ari.Channel();
 
-    var dialed = ari.Channel();
+      channel.on('StasisEnd', function(event, channel) {
+        hangupCalledParty(channel, dialed);
+      });
 
-    channel.on('StasisEnd', function(event, channel) {
-      hangupCalledParty(channel, dialed);
-    });
+      dialed.on('ChannelDestroyed', function(event, dialed) {
+        hangupCallingParty(channel, dialed);
+      });
 
-    dialed.on('ChannelDestroyed', function(event, dialed) {
-      hangupCallingParty(channel, dialed);
-    });
+      dialed.on('StasisStart', function(event, dialed) {
+        bridgeChannels(channel, dialed);
+      });
 
-    dialed.on('StasisStart', function(event, dialed) {
-      bridgeChannels(channel, dialed);
-    });
+      dialed.originate(
+        {
+          endpoint: endpoint, 
+          app: 'inbound',
+          appArgs: 'dialed',
+          // context: 'bridge_waiting',
+          // extension: 's',
+          // priority: '1',
+        },
+        function(err, dialed) {
+          if (!err) {
 
-    dialed.originate(
-      {endpoint: endpoint, app: 'inbound', appArgs: 'dialed'},
-      function(err, dialed) {
-        if (err) {
-          log.error("error_asteriskinstance_originatetandem_originate",{err: err});
-        }
-    });
+          } else {
+            log.error("error_asteriskinstance_originatetandem_originate",{err: err, box_uuid: box_uuid});
+          }
+      });
+
+    }
 
   }
 
@@ -209,7 +202,7 @@ module.exports = function(box_uuid, vac, opts, log) {
   // other end
   function hangupCalledParty(channel, dialed) {
     // Channelchannel.name left our application, hanging up dialed channel dialed.name
-    log.it("asteriskinstance_hangupcalledparty",{channel_left: channel.name, dailed_channel: dialed.name});
+    log.it("asteriskinstance_hangupcalledparty",{channel_left: channel.name, dailed_channel: dialed.name, box_uuid: box_uuid});
     
     // hangup the other end
     dialed.hangup(function(err) {
@@ -221,7 +214,7 @@ module.exports = function(box_uuid, vac, opts, log) {
   // handler for the dialed channel hanging up so we can gracefully hangup the
   // other end
   function hangupCallingParty(channel, dialed) {
-    log.it("asteriskinstance_hangupcallingparty",{hungup_channel: dialed.name, hangingup_channel: channel.name});
+    log.it("asteriskinstance_hangupcallingparty",{hungup_channel: dialed.name, hangingup_channel: channel.name, box_uuid: box_uuid});
     
     // hangup the other end
     channel.hangup(function(err) {
@@ -240,16 +233,16 @@ module.exports = function(box_uuid, vac, opts, log) {
 
     dialed.answer(function(err) {
       if (err) {
-        log.error("error_asteriskinstance_bridgechannels_answer",{err: err});
+        log.error("error_asteriskinstance_bridgechannels_answer",{err: err, box_uuid: box_uuid});
       }
     });
 
     bridge.create({type: 'mixing'}, function(err, bridge) {
       if (err) {
-        log.error("error_asteriskinstance_bridgechannels_bridgecreate",{err: err});
+        log.error("error_asteriskinstance_bridgechannels_bridgecreate",{err: err, box_uuid: box_uuid});
       }
 
-      log.it("asteriskinstance_bridge_create",{"created_bridgeid": bridge.id});
+      log.it("asteriskinstance_bridge_create",{"created_bridgeid": bridge.id, box_uuid: box_uuid});
 
       addChannelsToBridge(channel, dialed, bridge);
     });
@@ -257,11 +250,11 @@ module.exports = function(box_uuid, vac, opts, log) {
 
   // handler for the dialed channel leaving Stasis
   function exitCalledParty(dialed, bridge) {
-    log.it("asteriskinstance_exitcalledparty",{dialedchannel: dialed.name, destroy_bridge: bridge.id});
+    log.it("asteriskinstance_exitcalledparty",{dialedchannel: dialed.name, destroy_bridge: bridge.id, box_uuid: box_uuid});
 
     bridge.destroy(function(err) {
       if (err) {
-        log.error("error_asteriskinstance_dialexit_bridgedestroy",{err: err});
+        log.error("error_asteriskinstance_dialexit_bridgedestroy",{err: err, box_uuid: box_uuid});
       }
     });
   }
@@ -270,6 +263,7 @@ module.exports = function(box_uuid, vac, opts, log) {
   function addChannelsToBridge(channel, dialed, bridge) {
     
     log.it("asteriskinstance_addchannels", {
+      box_uuid: box_uuid,
       channel_name: channel.name,
       dialed_name: dialed.name,
       bridge_id: bridge.id,
@@ -278,7 +272,7 @@ module.exports = function(box_uuid, vac, opts, log) {
 
     bridge.addChannel({channel: [channel.id, dialed.id]}, function(err) {
       if (err) {
-        log.error("error_asteriskinstance_addchannelstobridge_addchannel",{err: err});
+        log.error("error_asteriskinstance_addchannelstobridge_addchannel",{err: err, box_uuid: box_uuid});
       }
     });
   }
@@ -289,13 +283,13 @@ module.exports = function(box_uuid, vac, opts, log) {
   
   var behavior_playback = function (media,event,channel) {
     
-    log.it("asteriskinstance_playbackstarted",{uuid: box_uuid, channel: channel.name, media: media});
+    log.it("asteriskinstance_playbackstarted",{box_uuid: box_uuid, channel: channel.name, media: media});
 
     var playback = ari.Playback();
 
     channel.play({media: media}, playback, function(err, newPlayback) {
       if (err) {
-        log.error("error_asteriskinstance_playbackfail",{err: err});
+        log.error("error_asteriskinstance_playbackfail",{err: err, box_uuid: box_uuid});
       }
     });
 
@@ -305,7 +299,7 @@ module.exports = function(box_uuid, vac, opts, log) {
 
       channel.hangup(function(err) {
         if (err) {
-          log.warn("error_asteriskinstance_channelhangup",{note: "looks like an early hangup", err: err});
+          log.warn("error_asteriskinstance_channelhangup",{note: "looks like an early hangup", err: err, box_uuid: box_uuid});
         }
       });
 
