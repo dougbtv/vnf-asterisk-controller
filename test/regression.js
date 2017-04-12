@@ -34,6 +34,13 @@ if (process.env.NOSERVER) {
   startserver = false;
 }
 
+// And sometimes you want to keep the configuration created by this script
+var keep_config = false;
+console.log("keep config? " + process.env.KEEPCONFIG);
+if (process.env.KEEPCONFIG == "1") {
+  keep_config = true;
+}
+
 // Start up vac.
 var vac;
 var LOGFILE = '/tmp/vac.log';
@@ -174,9 +181,11 @@ module.exports = {
         if(a.nickname > b.nickname) return 1;
         return 0; 
       })
+
+      all_discovery = data;
     
       test.ok(res.statusCode == 200, "discover returns 200 OK");
-      test.ok(data.length == 3,"three asterisk instances discovered");
+      test.ok(data.length == 4,"four asterisk instances discovered");
       test.ok(typeof data[0].uuid == 'string', "discover first element uuid is a string (" + data[0].uuid + ")");
       test.ok(data[1].ip.match(/^\d+\.\d+\.\d+\.\d+$/),"second element's IP address looks like an IP (" + data[1].ip + ")");
       uuid_a = data[0].uuid;
@@ -249,28 +258,50 @@ module.exports = {
       test.done();
     });
   },
-  connectTwoInstances: function(test){
+  connectInstancesInSeries: function(test){
+
+    // Assemble elements to be connected.
+    var connectors = [];
+    for (var i = 0; i < (all_discovery.length - 1); i++) {
+      connectors.push({
+        a_side: all_discovery[i].uuid,
+        b_side: all_discovery[i+1].uuid,
+        a_nick: all_discovery[i].nickname,
+        b_nick: all_discovery[i+1].nickname,
+      });
+    }
   
-    client.get('/connect/' + uuid_a + '/' + uuid_b + '/inbound', function(err, req, res, data) {
+    async.eachSeries(connectors,function(connect,callback){
 
-      if (err) {
-        test.ok(false, "Restify error: " + err);
-      }
-    
-      test.ok(res.statusCode == 200, "connect returns 200 OK");
+      // Connect each pair in the list.
+      client.get('/connect/' + connect.a_side + '/' + connect.b_side + '/inbound', function(err, req, res, data) {
 
-      if (typeof data.create_trunk_a !== 'undefined') {
-        test.ok(data.create_trunk_a.name == 'asterisk1' || data.create_trunk_a.name == 'asterisk2', "Trunk A name matches");
-        test.ok(data.create_trunk_b.name == 'asterisk1' || data.create_trunk_b.name == 'asterisk2', "Trunk B name matches");
-      } else {
-        test.ok(false,"Wonky return (likely trunks already exist)");
-      }
-
-      test.done();
+        if (err) {
+          test.ok(false, "Restify error: " + err);
+        }
       
+        test.ok(res.statusCode == 200, "trunk creation for " + connect.a_nick + " -> " + connect.b_nick + " returns 200 OK");
+
+        /*
+        if (typeof data.create_trunk_a !== 'undefined') {
+          test.ok(data.create_trunk_a.name == 'asterisk1' || data.create_trunk_a.name == 'asterisk2', "Trunk A name matches");
+          test.ok(data.create_trunk_b.name == 'asterisk1' || data.create_trunk_b.name == 'asterisk2', "Trunk B name matches");
+        } else {
+          test.ok(false,"Wonky return (likely trunks already exist)");
+        }
+        */
+
+        callback(err);
+        
+      });
+      
+    },function(err,result){
+      test.ok(!err,"Async series completed without error");
+      test.done();
     });
+
   },
-  getRouting: function(test){
+  getRoutingBefore: function(test){
   
     client.get('/get_routing', function(err, req, res, data) {
 
@@ -279,11 +310,58 @@ module.exports = {
       }
     
       test.ok(res.statusCode == 200, "gettrunk returns 200 OK");
-      test.ok(data.length === 3,"Two items in list");
+      test.ok(data.length === 4,"Four items in list");
       test.ok(data[0].role === null,"First instance role is null");
       test.ok(data[1].role === null,"Second instance role is null");
+      test.ok(data[2].role === null,"Third instance role is null");
+      test.ok(data[3].role === null,"Fourth instance role is null");
       test.done();
+
     });
+  },
+  setRouting: function(test) {
+
+    // Set the routing for all the instances.
+
+    var index = -1;
+
+    async.eachSeries(all_discovery,function(instance,callback){
+      
+      index++;
+
+      switch(index) {
+        case 0:
+          // This is the origination.
+          test.ok(instance.nickname == "asterisk1","Originating instance is named asterisk1");
+          callback(false);
+          break;
+
+        case all_discovery.length - 1:
+          // This is the termination.
+          test.ok(instance.nickname == "asterisk4","Terminating instance is named asterisk4");
+          client.get("/set_routing/" + instance.uuid  + "/playback/tt-monkeys", function(err, req, res, data) {
+            test.ok(res.statusCode == 200, "termination set_routing returns 200 OK");
+            callback(err);
+          });
+          break;
+
+        default:
+          // Everything else is a tandem.
+          // And should connect from this to the next.
+          client.get("/set_routing/" + instance.uuid  + "/tandem/" + all_discovery[index+1].nickname, function(err, req, res, data) {
+            test.ok(res.statusCode == 200, "Tandem returns 200 OK (" + instance.nickname + " -> " + all_discovery[index+1].nickname + ")");
+            callback(err);
+          });
+          break;
+      }
+
+
+    },function(err){
+
+      test.done();
+
+    });
+
   },
   discoverBeforeDelete: function(test){
   
@@ -302,37 +380,68 @@ module.exports = {
   },
   deleteAllTrunks: function(test){
 
-    var trunks_deleted = 0;
+    if (!keep_config) {
+   
+      var trunks_deleted = 0;
 
-    async.eachSeries(all_discovery,function(each_discovery,callback){
+      async.eachSeries(all_discovery,function(each_discovery,callback){
 
-      async.eachSeries(each_discovery.trunks,function(each_trunk,callback){
+        async.series([
+          // ----------------------------
+          // Delete the trunks
+          function(callback){
 
-        client.get('/deleteconfig/' + each_discovery.uuid + '/' + each_trunk, function(err, req, res, data) {
+            async.eachSeries(each_discovery.trunks,function(each_trunk,callback){
 
-          if (err) {
-            test.ok(false, "Restify error: " + err);
+              client.get('/deleteconfig/' + each_discovery.uuid + '/' + each_trunk, function(err, req, res, data) {
+
+                if (err) {
+                  test.ok(false, "Restify error: " + err);
+                }
+              
+                test.ok(res.statusCode == 200, "Trunk deleted (" + each_discovery.nickname + ": " + each_trunk + ")");
+                
+                // For each trunk.
+                trunks_deleted++;
+                callback(false);
+              });
+
+            },function(err,result){
+              // For each instance.
+              callback(false);
+            });
+
+          },
+          // ----------------------------
+          // Default the roles.
+          function (callback) {
+            client.get("/set_routing/" + each_discovery.uuid  + "/default", function(err, req, res, data) {
+              test.ok(res.statusCode == 200, "set_routing default returns 200 OK (" + each_discovery.nickname + ")");
+              callback(err);
+            });
           }
-        
-          test.ok(res.statusCode == 200, "Trunk deleted");
-          
-          // For each trunk.
-          trunks_deleted++;
-          callback(false);
+
+
+        ],function(err){
+
+          callback(err);
+
         });
 
       },function(err,result){
-        // For each instance.
-        callback(false);
+
+        // test.ok(trunks_deleted == 2,"Two trunks deleted.");
+        test.done();
+
       });
 
+    } else {
 
-    },function(err,result){
-
-      test.ok(trunks_deleted == 2,"Two trunks deleted.");
+      test.ok(true,"Configuration left intact, no trunks or roles deleted.");
       test.done();
 
-    });
+    }
+
 
   },
   serverKill: function(test) {

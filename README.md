@@ -106,9 +106,11 @@ This project includes unit tests for the backend.
 With a running server...
 
 ```
-export NOSERVER=1
+export NOSERVER=1 && export KEEPCONFIG=1
 grunt nodeunit
 ```
+
+(the `NOSERVER` environment variable runs the script against and already running server, and the `KEEPCONFIG` environment variable leaves the configuration created by the unit tests around for your own personal use/inspection should you wish)
 
 Without a running server, just use `grunt nodeunit`
 
