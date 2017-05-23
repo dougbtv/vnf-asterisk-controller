@@ -89,6 +89,10 @@ module.exports = function (grunt) {
                 '/app/styles',
                 connect.static('./app/styles')
               ),
+              connect().use(
+                '/config/',
+                connect.static('./config/')
+              ),
               connect.static(appConfig.app)
             ];
           }
@@ -379,6 +383,7 @@ module.exports = function (grunt) {
           src: [
             '*.{ico,png,txt}',
             '*.html',
+            'config/*.js',
             'images/{,*/}*.{webp}',
             'styles/fonts/{,*/}*.*'
           ]
