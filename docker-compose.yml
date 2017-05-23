@@ -3,7 +3,7 @@ services:
   # --------------------------------------------- Controller
   controller:
     container_name: controller
-    build: ./docker/.
+    build: ./dockerfiles/vnf-asterisk-controller/.
     image: dougbtv/vnf-asterisk-controller
     depends_on:
       - etcd
@@ -17,15 +17,17 @@ services:
   # --------------------------------------------- nginx (for front end)
   nginx:
     container_name: nginx
-    image: "docker.io/nginx:latest"
-    depends_on: 
-      - controller
-    volumes_from: 
-      - controller
+    # image: "docker.io/nginx:latest"
+    build: ./dockerfiles/vnf-asterisk-nginx/.
+    image: dougbtv/vnf-asterisk-nginx
+    # depends_on: 
+    #   - controller
+    # volumes_from:
+    #   - controller
     ports:
       - "80:80"
-    volumes: 
-      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+    # volumes: 
+    #   - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
   # --------------------------------------------- etcd
   # Cheat sheet !
   # ----------------------
