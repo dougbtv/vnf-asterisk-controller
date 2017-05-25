@@ -2,6 +2,7 @@
   "SERVER_PORT": "8001",
   "CONFIG_NAME": "example",
   "etcd_host": "etcd",
+  "etcd_port": "2379",
   "sourcery_port": "8088",
   "temp_path": "/tmp",
   "log_stdout": false,

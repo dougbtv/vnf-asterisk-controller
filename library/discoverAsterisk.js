@@ -10,8 +10,8 @@ module.exports = function(vac, opts, log) {
   //   })
   // })
   var etcdjs = require('etcdjs');
-  var store = etcdjs(opts.etcd_host + ':4001');
-  log.it("pushconfig_etcd","push config, etcd host @ " + opts.etcd_host + ':4001');
+  var store = etcdjs(opts.etcd_host + ':' + opts.etcd_port);
+  log.it("pushconfig_etcd","push config, etcd host @ " + opts.etcd_host + ':' + opts.etcd_port);
 
   // Given an identifier, gets an IP for a specific asterisk instance.
   this.getBoxIP = function(boxidentifier,callback) {
