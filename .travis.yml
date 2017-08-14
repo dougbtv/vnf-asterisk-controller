@@ -27,9 +27,9 @@ script:
   # For debug...
   - ip a
   # Builds the image(s)
-  - docker-compose build
+  - docker-compose -f dev-docker-compose.yml build
   # You can add environment variables with: -e DEBUG=1
-  - docker-compose up -d
+  - docker-compose -f dev-docker-compose.yml up -d
   - mkdir node_modules
   # Install the npm modules, as we're running locally
   - docker exec -it controller npm install --silent

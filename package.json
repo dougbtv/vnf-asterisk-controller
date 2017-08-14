@@ -27,7 +27,7 @@
     "nomnom": "*",
     "request": "*",
     "request-json": "^0.5.3",
-    "restify": "*",
+    "restify": "4.3.0",
     "uuid": "*"
   },
   "devDependencies": {
