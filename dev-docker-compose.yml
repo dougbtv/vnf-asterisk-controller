@@ -11,9 +11,9 @@ services:
       - etcd
     ports:
       - "8001:8001"
-    # volumes:
-    #   - "./:/vac"
-    command: "nodemon vnf-asterisk-controller.js"
+    volumes:
+      - "./:/vac"
+    command: "/bin/bash -c 'while true; do sleep 1; done'"
   # --------------------------------------------- nginx (for front end)
   nginx:
     container_name: nginx
