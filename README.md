@@ -17,12 +17,9 @@ The machine you intend to run it on should have git, docker, docker-compose, npm
 ```
 git clone https://github.com/dougbtv/vnf-asterisk-controller.git
 cd vnf-asterisk-controller
-sudo npm install -g grunt-cli
 docker-compose build
 docker-compose pull
 docker-compose up
-docker exec -it controller npm install
-docker exec -it controller nodemon vnf-asterisk-controller.js
 ```
 
 Then point your browser @ `http://localhost:80` to view the UI
@@ -72,13 +69,13 @@ This git repo includes a `docker-compose.yml` file, which requires docker-compos
 You can build the image for this with:
 
 ```
-docker-compose build
+docker-compose -f dev-docker-compose.yml build
 ```
 
 And you can run it with:
 
 ```
-docker-compose up
+docker-compose -f dev-docker-compose.yml up
 ```
 
 Note that the first time you run this, with the default way that the `docker-compose.yml` file is setup, it will mount the current working directory into the controller container.
@@ -87,6 +84,19 @@ Which means that you won't have the local `./node_modules/` folder populated, so
 
 ```
 docker exec -it controller npm install
+```
+
+Or in short:
+
+```
+git clone https://github.com/dougbtv/vnf-asterisk-controller.git
+cd vnf-asterisk-controller
+sudo npm install -g grunt-cli
+docker-compose build
+docker-compose pull
+docker-compose up
+docker exec -it controller npm install
+docker exec -it controller nodemon vnf-asterisk-controller.js
 ```
 
 ## Back-end nodemon in dev
